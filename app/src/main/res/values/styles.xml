@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="RoundedTopImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">24dp</item>
+        <item name="cornerSizeTopRight">24dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="CollapsedToolbarTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+    </style>
+
+    <style name="ExpandedToolbarTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">0sp</item>
+        <item name="android:textColor">@android:color/transparent</item>
+    </style>
+
+    <style name="ExpandedTitleStyle" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">@font/inter_black</item>
+    </style>
+
+    <style name="CollapsedTitleStyle" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+    </style>
+    <!-- Custom SearchView Style with White Background -->
+    <style name="CustomSearchViewStyle" parent="Widget.Material3.SearchView">
+        <item name="android:background">@color/white</item>
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
+    <!-- Custom SearchBar Style with White Background -->
+    <style name="CustomSearchBarStyle" parent="Widget.Material3.SearchBar">
+        <item name="android:background">@color/white</item>
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
+    <style name="CustomBottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+    <style name="CustomBottomSheet" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+</resources>

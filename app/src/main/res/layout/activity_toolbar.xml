@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/peach"
+    android:id="@+id/toolbar"
+    android:layout_height="55dp">
+    <ImageView
+        android:layout_width="40dp"
+        android:id="@+id/back_btn"
+        android:contentDescription="toolbar back button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginHorizontal="10dp"
+        android:src="@drawable/subh_back"
+        android:padding="7dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="40dp"/>
+    <ImageView
+        android:layout_width="40dp"
+        android:id="@+id/logo"
+        android:contentDescription="@string/splash_logo"
+       app:layout_constraintStart_toEndOf="@+id/back_btn"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/subh_logo2"
+        android:padding="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="40dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

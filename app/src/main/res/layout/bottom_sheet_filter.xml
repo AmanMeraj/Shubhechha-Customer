@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="@android:color/transparent">
+
+    <!-- CLOSE BUTTON FLOATING ABOVE -->
+    <FrameLayout
+        android:id="@+id/btnClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="0dp"
+        android:background="@drawable/close_button_background"
+        android:elevation="20dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_close"
+            android:tint="#FF6633"/>
+    </FrameLayout>
+
+
+    <!-- MAIN BOTTOM SHEET (PUSHED DOWN SO CLOSE BUTTON STAYS OUTSIDE) -->
+    <LinearLayout
+        android:id="@+id/bottomSheetContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/white_curve_bg"
+        android:orientation="vertical"
+        android:paddingTop="50dp"
+        android:paddingBottom="0dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:layout_marginTop="70dp">    <!-- IMPORTANT: pushes sheet downward -->
+
+        <!-- LOGO INSIDE -->
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/subh_logo2"
+            android:layout_gravity="center"
+            android:layout_marginBottom="40dp"/>
+
+        <!-- Filter By -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter By"
+            android:textColor="#000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Filter Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/btnVeg"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:paddingHorizontal="30dp"
+                android:text="Veg"
+                android:textColor="#FFF"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:background="@drawable/btn_selected"
+                android:layout_marginEnd="12dp"/>
+
+            <TextView
+                android:id="@+id/btnNonVeg"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:paddingHorizontal="30dp"
+                android:text="Non-Veg"
+                android:textColor="#666"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:background="@drawable/btn_unselected"/>
+        </LinearLayout>
+
+
+        <!-- Sort By Price -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sort By Price"
+            android:textColor="#000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Sort Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:id="@+id/btnLowToHigh"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:paddingHorizontal="30dp"
+                android:text="Low to High"
+                android:textColor="#FFF"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:background="@drawable/btn_selected"
+                android:layout_marginEnd="12dp"/>
+
+            <TextView
+                android:id="@+id/btnHighToLow"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:paddingHorizontal="30dp"
+                android:text="High to Low"
+                android:textColor="#666"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:background="@drawable/btn_unselected"/>
+        </LinearLayout>
+
+        <!-- Submit Button -->
+        <TextView
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Submit"
+            android:textColor="#FFF"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:background="@drawable/btn_submit"/>
+
+    </LinearLayout>
+
+</FrameLayout>

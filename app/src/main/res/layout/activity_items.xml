@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".Activities.NotificationActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
+
+        <!-- Collapsing Toolbar Layout -->
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:contentScrim="@color/peach"
+            app:titleEnabled="false"
+            app:toolbarId="@id/toolbar"
+            app:collapsedTitleTextAppearance="@android:color/transparent">
+
+            <!-- Expandable Header Section with Peach Background -->
+            <FrameLayout
+                android:id="@+id/headerContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_collapseMode="parallax"
+                android:background="@color/peach"
+                app:layout_collapseParallaxMultiplier="0.7">
+
+                <View
+                    android:layout_marginTop="62dp"
+                    android:id="@+id/peach_curve_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:background="@color/peach"/>
+
+                <!-- Title in expanded state -->
+                <TextView
+                    android:id="@+id/tv_notification_expanded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:layout_marginBottom="10dp"
+                    android:text="Category Name"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    android:fontFamily="@font/inter_black"/>
+                <ImageView
+
+                    android:id="@+id/search_btn"
+                    android:elevation="5dp"
+                    android:padding="5dp"
+                    android:background="@drawable/orange_circle"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="60dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/subh_search"/>
+                <ImageView
+                    android:id="@+id/filter_btn"
+                    android:elevation="5dp"
+                    android:padding="7dp"
+                    android:background="@drawable/white_capsule_bg"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/subh_filter"/>
+            </FrameLayout>
+
+            <!-- Fixed Toolbar - Pins at top when collapsed -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:minHeight="55dp"
+                android:layout_gravity="top"
+                app:layout_collapseMode="pin">
+
+                <!-- Background for collapsed state -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/peach"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Back Button -->
+                <ImageView
+                    android:id="@+id/back_btn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="10dp"
+                    android:contentDescription="toolbar back button"
+                    android:padding="7dp"
+                    android:src="@drawable/subh_back"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Logo -->
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/splash_logo"
+                    android:padding="6dp"
+                    android:src="@drawable/subh_logo2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/back_btn"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Title in collapsed state (initially hidden) -->
+                <TextView
+                    app:layout_constraintEnd_toStartOf="@+id/search_btn_tool_bar"
+                    android:id="@+id/tv_toolbar_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Category Name"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    android:fontFamily="@font/inter_black"
+                    android:alpha="0"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintStart_toEndOf="@id/logo"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+                <ImageView
+                    android:layout_marginEnd="5dp"
+                    android:id="@+id/search_btn_tool_bar"
+                    android:alpha="0"
+                    app:layout_constraintEnd_toStartOf="@+id/filter_btn_tool_bar"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:elevation="5dp"
+                    android:padding="7dp"
+                    android:background="@drawable/orange_circle"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/subh_search"/>
+                <ImageView
+                    android:id="@+id/filter_btn_tool_bar"
+                    android:alpha="0"
+                    app:layout_constraintEnd_toStartOf="@+id/cart"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:elevation="5dp"
+                    android:padding="7dp"
+                    android:background="@drawable/white_capsule_bg"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/subh_filter"/>
+                <ImageView
+                    android:id="@+id/cart"
+                    android:padding="7dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_width="40dp"
+                    android:src="@drawable/shub_shopping"
+                    android:layout_height="40dp"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="0dp"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_category_horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/half_moon_down"
+            android:id="@+id/rc_category"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:text="Category"
+            android:textColor="@color/black"
+            android:fontFamily="@font/inter_extrabold"
+            android:textSize="15sp"
+            android:id="@+id/tv_category"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="@dimen/spacing_large"
+            android:layout_width="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rc_category"
+            android:layout_height="wrap_content"/>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:elevation="20dp"
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rc_notification"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="0dp"
+            android:paddingHorizontal="10dp"
+            android:clipToPadding="false"
+            android:paddingTop="@dimen/spacing_normal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:paddingBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@+id/tv_category"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:listitem="@layout/item_shop_item_row"/>
+
+        <!-- Empty State Layout -->
+        <LinearLayout
+            android:id="@+id/emptyStateLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/no_item"
+                android:alpha="0.9"
+                android:contentDescription="No notifications"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oops! Sorry"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:fontFamily="@font/inter_bold"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No items to show."
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:fontFamily="@font/inter_medium"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Material 3 SearchView (Full screen search - NO ANCHOR) -->
+    <com.google.android.material.search.SearchView
+        android:id="@+id/search_view"
+        style="@style/CustomSearchViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="Search items..."
+        android:visibility="gone">
+
+        <!-- Search results RecyclerView inside SearchView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:background="@color/white"
+            android:id="@+id/search_results_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            android:paddingTop="8dp"
+            android:clipToPadding="false"
+            android:visibility="gone"/>
+
+    </com.google.android.material.search.SearchView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

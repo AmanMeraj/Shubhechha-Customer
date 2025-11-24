@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+
+    <!-- AppBarLayout (Collapsing Toolbar) -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@id/toolbar"
+            app:contentScrim="@color/peach"
+            app:titleEnabled="false">
+
+            <!-- Header -->
+            <FrameLayout
+                android:id="@+id/headerContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7">
+
+                <View
+                    android:layout_marginTop="62dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="110dp"
+                    android:background="@drawable/peach_curve_bg2"/>
+
+                <TextView
+                    android:id="@+id/tv_notification_expanded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:layout_marginBottom="60dp"
+                    android:text="Add Address"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_large"
+                    android:fontFamily="@font/inter_black"/>
+            </FrameLayout>
+
+            <!-- Collapsed Toolbar -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/peach"/>
+
+                <ImageView
+                    android:id="@+id/back_btn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="10dp"
+                    android:padding="7dp"
+                    android:src="@drawable/subh_back"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="6dp"
+                    android:src="@drawable/subh_logo2"
+                    app:layout_constraintStart_toEndOf="@id/back_btn"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tv_toolbar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Address"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/inter_black"
+                    android:alpha="0"
+                    app:layout_constraintStart_toEndOf="@id/logo"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <ProgressBar
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:id="@+id/progress_bar"
+            android:layout_height="wrap_content"/>
+        <RelativeLayout
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_above="@+id/btn_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/img_no_address"
+                android:layout_centerInParent="true"
+                android:src="@drawable/no_address"
+                android:layout_width="250dp"
+                android:layout_height="250dp"/>
+            <TextView
+                android:layout_marginHorizontal="20dp"
+                android:layout_below="@+id/img_no_address"
+                android:textColor="@color/black"
+                android:fontFamily="@font/inter_bold"
+                android:id="@+id/tv_empty_state"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            </TextView>
+
+        </RelativeLayout>
+
+        <!-- RecyclerView stays above the fixed button -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rc_address_book"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/spacing_normal"
+            android:layout_alignParentTop="true"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false"
+            android:layout_above="@id/btn_submit" />
+
+
+        <!-- FIXED Bottom Button -->
+        <RelativeLayout
+            android:id="@+id/btn_submit"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/add_address_button_bg"
+            android:layout_margin="16dp"
+            android:elevation="10dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_toStartOf="@+id/tv_submit"
+                android:id="@+id/img_add"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:padding="8dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/subh_plus" />
+
+            <TextView
+                android:id="@+id/tv_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Add Address"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:fontFamily="@font/inter_semibold" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

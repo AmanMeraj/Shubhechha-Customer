@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Shubhechha</string>
+    <string name="splash_logo">Splash Logo</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="delivery_person_description">Delivery Person Image\n</string>
+    <string name="icon_description">Logo_imgae\n</string>
+    <string name="next_button_description">next_button\n</string>
+    <string name="intro_title_1">Quick delivery at your \nhome address</string>
+    <string name="intro_description_1">Home delivery and Online reservation system \nfor restaurants and cafe</string>
+    <string name="intro_title_2">Intro title 2</string>
+    <string name="intro_title_3">Intro title 3</string>
+    <string name="intro_description_2">intro desc 2</string>
+    <string name="intro_description_3">Intro desc 3</string>
+</resources>

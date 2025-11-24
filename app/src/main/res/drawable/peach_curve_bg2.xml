@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="120dp"
+    android:viewportWidth="360"
+    android:viewportHeight="120">
+
+    <!-- Perfect convex curved background -->
+    <path
+        android:fillColor="@color/peach"
+        android:pathData="M 0,0 L 360,0 L 360,80 Q 270,120 180,120 Q 90,120 0,80 Z" />
+</vector>

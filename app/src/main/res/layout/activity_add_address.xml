@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/white"
+    android:clipToPadding="false"
+    tools:context=".Fragments.ProfileFragment">
+
+    <RelativeLayout
+        android:id="@+id/relative_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            layout="@layout/activity_toolbar"
+            android:id="@+id/toolbar"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"/>
+
+        <!-- Peach Curved Background at Top -->
+        <View
+            android:layout_below="@+id/toolbar"
+            android:id="@+id/peach_curve_bg"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="@drawable/peach_curve_bg" />
+
+        <!-- Profile Title -->
+        <TextView
+            android:layout_below="@+id/toolbar"
+            android:id="@+id/tv_notification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="Add Address"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size_large"
+            android:fontFamily="@font/inter_black" />
+
+        <!-- Form Container -->
+        <LinearLayout
+            android:id="@+id/form_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/peach_curve_bg"
+            android:layout_marginTop="-60dp"
+            android:layout_marginBottom="@dimen/spacing_large"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_large"
+            android:elevation="4dp">
+
+            <!-- Apartment No. Field -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingEnd="@dimen/spacing_normal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:id="@+id/iv_apartment"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:src="@drawable/subh_room" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/iv_apartment"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Apartment No."
+                        android:textSize="10sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="sans-serif" />
+
+                    <EditText
+                        android:id="@+id/et_apartment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Apartment No."
+                        android:textSize="@dimen/text_size_medium"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/black"
+                        android:background="@android:color/transparent"
+                        android:inputType="text"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Street Address Field -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingEnd="@dimen/spacing_normal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:id="@+id/iv_street"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:src="@drawable/subh_location" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/iv_street"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Street Address"
+                        android:textSize="10sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="sans-serif" />
+
+                    <EditText
+                        android:id="@+id/et_street"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Street Address"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/black"
+                        android:background="@android:color/transparent"
+                        android:inputType="textPostalAddress"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Pin Code Field -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingEnd="@dimen/spacing_normal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:id="@+id/iv_pincode"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:src="@drawable/subh_location"
+                    />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/iv_pincode"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pin Code"
+                        android:textSize="10sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="sans-serif" />
+
+                    <EditText
+                        android:id="@+id/et_pincode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pin Code"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/black"
+                        android:background="@android:color/transparent"
+                        android:inputType="number"
+                        android:maxLength="6"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Contact Phone No. Field -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_large"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingEnd="@dimen/spacing_normal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:id="@+id/iv_phone"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:src="@drawable/shub_phone"
+                    app:tint="@color/black" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/iv_phone"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Contact Person Phone No."
+                        android:textSize="10sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="sans-serif" />
+
+                    <EditText
+                        android:id="@+id/et_phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:maxLength="10"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/black"
+                        android:background="@android:color/transparent"
+                        android:inputType="phone"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Submit Button -->
+            <RelativeLayout
+                android:id="@+id/btn_submit"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@drawable/button_bg"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Submit"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_medium"
+                    android:fontFamily="@font/inter_semibold" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</ScrollView>

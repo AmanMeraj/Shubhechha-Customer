@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFB094">
+
+    <!-- Guideline at 20% from top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_top_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.30" />
+
+    <!-- Guideline at 80% from top (for continue button section) -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_bottom_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="1" />
+
+    <!-- Burger Image -->
+    <ImageView
+        android:id="@+id/burger_img"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/burger"
+        android:contentDescription="Food image"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <!-- Logo Image -->
+    <ImageView
+        android:id="@+id/logo_img"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/shub_logo"
+        android:contentDescription="Company Logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guideline_top_section" />
+
+    <!-- Kawab Image -->
+    <ImageView
+        android:id="@+id/kawab_img"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/kawab"
+        android:layout_marginTop="-20dp"
+        android:layout_marginStart="-30dp"
+        app:layout_constraintStart_toEndOf="@+id/logo_img"
+        android:contentDescription="Food image"
+        app:layout_constraintTop_toBottomOf="@id/logo_img"
+        />
+
+    <!-- Wave ImageView -->
+    <ImageView
+        android:id="@+id/waveView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:elevation="-15dp"
+        android:src="@drawable/wave_shape"
+        android:contentDescription="wave"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- White background section (20% to 80%) -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_curve_square"
+        app:layout_constraintTop_toTopOf="@id/guideline_top_section"
+        app:layout_constraintBottom_toTopOf="@id/guideline_bottom_section"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/welcome_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="92dp"
+        android:text="Welcome !"
+        android:textSize="30sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/inter_black"
+        app:layout_constraintTop_toTopOf="@id/guideline_top_section"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Subtitle Text -->
+    <TextView
+        android:id="@+id/subtitle_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Enter your phone number."
+        android:textSize="11sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/inter_medium"
+        app:layout_constraintTop_toBottomOf="@id/welcome_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Phone Input Container -->
+    <RelativeLayout
+        android:id="@+id/phone_input_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="20dp"
+        android:paddingVertical="10dp"
+        app:layout_constraintTop_toBottomOf="@id/subtitle_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/phone_img"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_margin="10dp"
+            android:padding="12dp"
+            android:background="@drawable/orange_circle"
+            android:src="@drawable/shub_phone"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/phone_img"
+            android:layout_marginEnd="10dp"
+            android:layout_marginVertical="10dp"
+            app:cardElevation="5dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="30dp">
+
+            <EditText
+                android:id="@+id/et_phone"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@color/white"
+                android:inputType="number"
+                android:maxLines="1"
+                android:maxLength="10"
+                android:textSize="15sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/inter_medium"
+                android:hint="Enter Your Phone Number"
+                android:layout_marginHorizontal="20dp"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Orange Continue Button Section (bottom 20% of screen) -->
+    </RelativeLayout>
+    <RelativeLayout
+        android:padding="15dp"
+        android:id="@+id/btn_continue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <ImageView
+                android:id="@+id/arrow_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/shub_next"/>
+
+            <TextView
+                android:id="@+id/tv_continue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/arrow_image"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/white"
+                android:fontFamily="@font/inter_bold"
+                android:text="Continue"/>
+        </RelativeLayout>
+    </RelativeLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

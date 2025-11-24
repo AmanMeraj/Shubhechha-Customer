@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/values/attrs.xml -->
+<resources>
+    <declare-styleable name="ProfileRow">
+        <attr name="iconSrc" format="reference" />
+        <attr name="textLabel" format="string" />
+    </declare-styleable>
+</resources>
+

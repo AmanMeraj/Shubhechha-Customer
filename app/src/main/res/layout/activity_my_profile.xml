@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/white"
+    tools:context=".Fragments.ProfileFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/activity_toolbar"
+            android:id="@+id/toolbar"/>
+
+        <TextView
+            android:layout_below="@+id/toolbar"
+            android:padding="10dp"
+            android:text="My Profile"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/inter_bold"
+            android:elevation="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </TextView>
+
+        <!-- Curved Background -->
+        <View
+            android:layout_below="@+id/toolbar"
+            android:id="@+id/peach_bg"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@drawable/peach_curve_bg" />
+
+        <!-- Profile Picture Container -->
+        <FrameLayout
+
+            android:id="@+id/frame_profile"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="110dp">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/no_profile"
+                app:civ_border_color="@color/white"
+                app:civ_border_width="3dp"
+                android:elevation="2dp" />
+
+            <!-- Camera Button Overlay -->
+            <ImageView
+                android:id="@+id/btn_change_photo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="10dp"
+                android:elevation="5dp"
+                android:background="@drawable/black_circle"
+                android:padding="8dp"
+                android:src="@drawable/camera"
+                android:contentDescription="Change photo" />
+        </FrameLayout>
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tv_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/frame_profile"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="My Profile"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <!-- Input Fields -->
+        <LinearLayout
+            android:id="@+id/linear_fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_profile"
+            android:layout_marginTop="20dp"
+            android:paddingHorizontal="24dp"
+            android:orientation="vertical">
+
+            <!-- Name Field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="10dp"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/shub_profile"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/et_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:hint="Enter your name"
+                    android:inputType="textPersonName"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    android:background="@android:color/transparent"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Email Field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="10dp"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/shub_email"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/et_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:hint="example@gamil.com"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    android:background="@android:color/transparent"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Phone Field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/edit_text_bg"
+                android:paddingStart="10dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/shub_phone"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/et_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:hint="Enter Your Number"
+                    android:inputType="phone"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    android:background="@android:color/transparent"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Update Button -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_update"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Update Profile"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:background="@drawable/button_bg"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="20dp"
+                android:fontFamily="@font/inter_semibold" />
+        </LinearLayout>
+        <FrameLayout
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:visibility="gone"
+            android:focusable="true">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:elevation="20dp"
+                 />
+
+        </FrameLayout>
+    </RelativeLayout>
+</ScrollView>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        app:cardCornerRadius="10dp"
+        android:background="#EEEEEE"
+        android:elevation="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <!-- Icon Background Circle -->
+            <View
+                android:id="@+id/icon_background"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/black_circle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <!-- Dollar Icon -->
+            <ImageView
+                android:id="@+id/icon_image"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/subh_logo2"
+                app:layout_constraintStart_toStartOf="@+id/icon_background"
+                app:layout_constraintEnd_toEndOf="@+id/icon_background"
+                app:layout_constraintTop_toTopOf="@+id/icon_background"
+                app:layout_constraintBottom_toBottomOf="@+id/icon_background"/>
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Mustard Oil"
+                android:textColor="@color/black"
+                android:fontFamily="@font/inter_bold"
+                android:textSize="16sp"
+                android:layout_marginStart="12dp"
+                app:layout_constraintStart_toEndOf="@+id/icon_background"
+                app:layout_constraintTop_toTopOf="@+id/icon_background"
+                app:layout_constraintEnd_toStartOf="@+id/tv_amount"/>
+
+            <!-- Subtitle -->
+            <TextView
+                android:id="@+id/tv_subtitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Contrary to popular belief."
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintStart_toEndOf="@+id/icon_background"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title"
+                app:layout_constraintEnd_toStartOf="@+id/tv_amount"/>
+
+            <!-- Amount -->
+            <TextView
+                android:id="@+id/tv_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-₹ 500"
+                android:textColor="#FF6B35"
+                android:fontFamily="@font/inter_bold"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/icon_background"/>
+
+            <!-- Date -->
+            <TextView
+                android:id="@+id/tv_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20 Jul, 2025"
+                android:textColor="#999999"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_amount"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

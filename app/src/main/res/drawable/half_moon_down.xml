@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="100dp"
+    android:viewportWidth="200"
+    android:viewportHeight="100">
+
+    <!-- Orange half-moon with flat top and a gentle downward curve -->
+    <path
+        android:fillColor="@color/peach"
+        android:pathData="M0,0 L200,0 Q100,80 0,0 Z" />
+</vector>

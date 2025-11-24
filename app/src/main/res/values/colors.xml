@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="orange">#E6762B</color>
+    <color name="success_green">#78C841</color>
+    <color name="error_red">#FF0000</color>
+    <color name="peach">#FFC299</color>
+
+    <color name="red">#FF6B35</color>
+    <color name="green">#4CAF50</color>
+    <color name="gray">#666666</color>
+    <color name="light_gray">#999999</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#F5F5F5</color>
+    <color name="card_background">#EEEEEE</color>
+</resources>
