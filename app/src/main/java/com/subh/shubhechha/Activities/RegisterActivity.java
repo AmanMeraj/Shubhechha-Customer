@@ -265,7 +265,7 @@ public class RegisterActivity extends Utility {
         }
 
         // Save cart count if available
-        pref.setPrefInteger(this, pref.cart_item, data.getCart_count());
+        pref.setPrefInteger(this,pref.cart_count,data.getCart_count());
     }
 
     /**

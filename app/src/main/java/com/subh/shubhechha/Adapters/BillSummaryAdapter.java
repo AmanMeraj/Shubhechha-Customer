@@ -20,9 +20,15 @@ public class BillSummaryAdapter extends BaseAdapter {
         this.billSummaries = billSummaries;
     }
 
+    public void updateData(List<BillSummary> newBillSummaries) {
+        this.billSummaries.clear();
+        this.billSummaries.addAll(newBillSummaries);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
-        return billSummaries.size();
+        return billSummaries != null ? billSummaries.size() : 0;
     }
 
     @Override
@@ -50,7 +56,16 @@ public class BillSummaryAdapter extends BaseAdapter {
         BillSummary summary = billSummaries.get(position);
 
         binding.tvBillLabel.setText(summary.getLabel());
-        binding.tvBillAmount.setText("₹ " + String.format("%.0f", summary.getAmount()));
+
+        // Format amount with proper sign
+        double amount = summary.getAmount();
+        String formattedAmount;
+        if (amount < 0) {
+            formattedAmount = "- ₹ " + String.format("%.0f", Math.abs(amount));
+        } else {
+            formattedAmount = "₹ " + String.format("%.0f", amount);
+        }
+        binding.tvBillAmount.setText(formattedAmount);
 
         return convertView;
     }

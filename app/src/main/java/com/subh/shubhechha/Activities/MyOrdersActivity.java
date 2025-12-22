@@ -9,22 +9,33 @@ import androidx.activity.EdgeToEdge;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.subh.shubhechha.Adapters.OrderAdapter;
 import com.subh.shubhechha.Model.OrderModel;
 import com.subh.shubhechha.R;
+import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.ActivityMyOrdersBinding;
 import com.subh.shubhechha.utils.Utility;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MyOrdersActivity extends Utility {
 
     private ActivityMyOrdersBinding binding;
     private OrderAdapter orderAdapter;
-    private ArrayList<OrderModel> orderList;
+    private ArrayList<OrderModel.Order> orderList;
+    private ViewModel orderViewModel;
+
+    // Pagination variables
+    private int currentPage = 1;
+    private int lastPage = 1;
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +52,12 @@ public class MyOrdersActivity extends Utility {
                 return insets;
             });
 
+
             initializeViews();
             setupCollapsingToolbar();
             setupRecyclerView();
-            loadOrders();
+            setupViewModel();
+            loadOrders(currentPage);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,17 +67,12 @@ public class MyOrdersActivity extends Utility {
 
     private void initializeViews() {
         try {
-            // Setup toolbar back button
             if (binding.backBtn != null) {
-                binding.backBtn.setOnClickListener(v -> onBackPressed());
+                binding.backBtn.setOnClickListener(v -> navigateToContainer());
             }
 
-            // Setup shop now button
             if (binding.shopNowButton != null) {
-                binding.shopNowButton.setOnClickListener(v -> {
-                    // Navigate to shop/home
-                    onBackPressed();
-                });
+                binding.shopNowButton.setOnClickListener(v -> navigateToContainer());
             }
 
         } catch (Exception e) {
@@ -85,33 +93,27 @@ public class MyOrdersActivity extends Utility {
                     float percentage = Math.abs(verticalOffset / (float) scrollRange);
                     if (Float.isNaN(percentage) || Float.isInfinite(percentage)) return;
 
-                    // Fade in/out toolbar title
                     if (binding.tvToolbarTitle != null) {
                         binding.tvToolbarTitle.setAlpha(percentage);
                     }
 
-                    // Fade in/out expanded title
                     if (binding.tvOrdersExpanded != null) {
                         binding.tvOrdersExpanded.setAlpha(1 - percentage);
                     }
 
-                    // Scale the background curve
                     if (binding.peachCurveBg != null) {
                         float scale = 1 - (percentage * 0.2f);
                         scale = Math.max(0.8f, Math.min(1f, scale));
                         binding.peachCurveBg.setScaleY(scale);
                     }
 
-                    // Check if fully collapsed or expanded
                     if (Math.abs(verticalOffset) >= scrollRange) {
                         if (!isCollapsed) {
                             isCollapsed = true;
-                            onToolbarCollapsed();
                         }
                     } else {
                         if (isCollapsed) {
                             isCollapsed = false;
-                            onToolbarExpanded();
                         }
                     }
                 }
@@ -122,32 +124,40 @@ public class MyOrdersActivity extends Utility {
         }
     }
 
-    private void onToolbarCollapsed() {
-        // Called when toolbar is fully collapsed
-        // Add any additional animations or state changes here
-    }
-
-    private void onToolbarExpanded() {
-        // Called when toolbar is fully expanded
-        // Add any additional animations or state changes here
-    }
-
     private void setupRecyclerView() {
         try {
             orderList = new ArrayList<>();
             orderAdapter = new OrderAdapter(this, orderList);
 
-            binding.rcAddressBook.setLayoutManager(new LinearLayoutManager(this));
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            binding.rcAddressBook.setLayoutManager(layoutManager);
             binding.rcAddressBook.setAdapter(orderAdapter);
             binding.rcAddressBook.setHasFixedSize(true);
 
-            // Set click listener
+            // Pagination scroll listener
+            binding.rcAddressBook.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                    if (!isLoading && !isLastPage) {
+                        if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                                && firstVisibleItemPosition >= 0) {
+                            loadMoreOrders();
+                        }
+                    }
+                }
+            });
+
             orderAdapter.setOnOrderClickListener((order, position) -> {
-                // Add a slight delay for better UX
                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                     Intent intent = new Intent(this, OrderDetailsActivity.class);
-                    intent.putExtra("order_id", order.getOrderId());
-                    intent.putExtra("store_name", order.getStoreName());
+                    intent.putExtra("order_id", order.getId());
+                    intent.putExtra("order_no", order.getOrderno());
                     startActivity(intent);
                     overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 }, 400);
@@ -159,116 +169,99 @@ public class MyOrdersActivity extends Utility {
         }
     }
 
-    private void loadOrders() {
+    private void setupViewModel() {
         try {
-            // Show loading state
-            showLoading(true);
-
-            // Sample data - Replace with your actual data loading logic (API call, database, etc.)
-            orderList.add(new OrderModel(
-                    "Fresh Mart Store",
-                    "#254586",
-                    "1000",
-                    "20 Jul, 2025",
-                    "Delivered",
-                    R.drawable.subh_img1
-            ));
-
-            orderList.add(new OrderModel(
-                    "Electronics Hub",
-                    "#254587",
-                    "2500",
-                    "18 Jul, 2025",
-                    "Processing",
-                    R.drawable.subh_img1
-            ));
-
-            orderList.add(new OrderModel(
-                    "Fashion Boutique",
-                    "#254588",
-                    "1500",
-                    "15 Jul, 2025",
-                    "Delivered",
-                    R.drawable.subh_img1
-            ));
-
-            orderList.add(new OrderModel(
-                    "Grocery Corner",
-                    "#254589",
-                    "800",
-                    "12 Jul, 2025",
-                    "Cancelled",
-                    R.drawable.subh_img1
-            ));
-
-            orderList.add(new OrderModel(
-                    "Book Store",
-                    "#254590",
-                    "600",
-                    "10 Jul, 2025",
-                    "Pending",
-                    R.drawable.subh_img1
-            ));
-
-            orderList.add(new OrderModel(
-                    "Tech Store",
-                    "#254591",
-                    "3200",
-                    "08 Jul, 2025",
-                    "Delivered",
-                    R.drawable.subh_img1
-            ));
-
-            orderList.add(new OrderModel(
-                    "Food Market",
-                    "#254592",
-                    "450",
-                    "05 Jul, 2025",
-                    "Delivered",
-                    R.drawable.subh_img1
-            ));
-
-            // Notify adapter
-            orderAdapter.notifyDataSetChanged();
-
-            // Update empty state
-            updateEmptyState();
-
-            // Hide loading
-            showLoading(false);
-
+            orderViewModel = new ViewModelProvider(this).get(ViewModel.class);
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Failed to load orders");
-            showLoading(false);
         }
     }
 
-    // Method to refresh orders from server/database
-    private void refreshOrders() {
+    private void loadOrders(int page) {
+        if (isLoading) return;
+
         try {
-            // Show loading
+            isLoading = true;
             showLoading(true);
 
-            // Clear existing list
-            orderList.clear();
+            String authToken = "Bearer " + getAuthToken(); // Get your auth token from SharedPreferences
 
-            // Load new data
-            loadOrders();
+            orderViewModel.getOrders(authToken).observe(this, response -> {
+                isLoading = false;
+                showLoading(false);
 
-            // Notify adapter
-            orderAdapter.notifyDataSetChanged();
+                if (response != null) {
+                    if (response.data.getStatus() ==1) {
+                        handleOrdersResponse(response.data);
+                    } else {
+                        showError(response.data.getMessage() != null ? response.data.getMessage() : "Failed to load orders");
+                    }
+                } else {
+                    showError("Failed to load orders");
+                }
+            });
 
-            // Update empty state
+        } catch (Exception e) {
+            e.printStackTrace();
+            isLoading = false;
+            showLoading(false);
+            showError("Failed to load orders");
+        }
+    }
+
+    private void handleOrdersResponse(OrderModel orderModel) {
+        try {
+            if (orderModel.getData() != null && orderModel.getData().getOrders() != null) {
+                OrderModel.Orders ordersData = orderModel.getData().getOrders();
+
+                currentPage = ordersData.getCurrent_page();
+                lastPage = ordersData.getLast_page();
+                isLastPage = currentPage >= lastPage;
+
+                List<OrderModel.Order> newOrders = ordersData.getData();
+
+                if (newOrders != null && !newOrders.isEmpty()) {
+                    if (currentPage == 1) {
+                        orderList.clear();
+                    }
+
+                    int startPosition = orderList.size();
+                    orderList.addAll(newOrders);
+
+                    if (currentPage == 1) {
+                        orderAdapter.notifyDataSetChanged();
+                    } else {
+                        orderAdapter.notifyItemRangeInserted(startPosition, newOrders.size());
+                    }
+                }
+            }
+
             updateEmptyState();
 
-            // Hide loading
-            showLoading(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Failed to process orders");
+        }
+    }
+
+    private void loadMoreOrders() {
+        if (!isLastPage && !isLoading) {
+            currentPage++;
+            loadOrders(currentPage);
+        }
+    }
+
+    private void refreshOrders() {
+        try {
+            currentPage = 1;
+            isLastPage = false;
+            orderList.clear();
+            orderAdapter.notifyDataSetChanged();
+            loadOrders(currentPage);
 
         } catch (Exception e) {
             e.printStackTrace();
             showError("Failed to refresh orders");
-            showLoading(false);
         }
     }
 
@@ -292,7 +285,10 @@ public class MyOrdersActivity extends Utility {
     private void showLoading(boolean show) {
         try {
             if (binding.progressBar != null) {
-                binding.progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+                // Only show progress bar for first page
+                if (currentPage == 1) {
+                    binding.progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -309,10 +305,52 @@ public class MyOrdersActivity extends Utility {
         }
     }
 
+    private String getAuthToken() {
+        return pref.getPrefString(this,pref.user_token);
+    }
+
+    /**
+     * Navigate to ContainerActivity and clear back stack
+     */
+    private void navigateToContainer() {
+        try {
+            Intent intent = new Intent(this, ContainerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback to normal back press if navigation fails
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            getOnBackPressedDispatcher().onBackPressed();
+        } else {
+            navigateToContainer();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register back press callback for Android 13+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    navigateToContainer();
+                }
+            });
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Clean up resources
         if (binding != null) {
             binding = null;
         }

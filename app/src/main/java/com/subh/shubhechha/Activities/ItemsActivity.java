@@ -1,7 +1,11 @@
 package com.subh.shubhechha.Activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -12,16 +16,22 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.subh.shubhechha.Adapters.ShopHorizontalCategoryAdapter;
 import com.subh.shubhechha.Adapters.ShopItemAdapter;
+import com.subh.shubhechha.Model.AddToCartModel;
+import com.subh.shubhechha.Model.CartResponse;
 import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.ActivityItemsBinding;
+import com.subh.shubhechha.utils.SharedPref;
 import com.subh.shubhechha.utils.Utility;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ItemsActivity extends Utility {
     private ActivityItemsBinding binding;
@@ -29,6 +39,8 @@ public class ItemsActivity extends Utility {
     private ShopItemAdapter shopItemAdapter;
     private ShopItemAdapter searchAdapter;
     private ViewModel viewModel;
+    private int apiCartItemCount = 0;
+    private double apiCartSubtotal = 0.0;
 
     private String currentCategoryName = "All Shops";
     private String shopName = "Shops";
@@ -37,13 +49,38 @@ public class ItemsActivity extends Utility {
     private String authorization;
     private String longitude;
     private String latitude;
-    private boolean isInitialLoad = true;
 
     private List<ShopItemResponse.Datum> filteredItemList;
 
     // Filter and Sort parameters
     private List<String> selectedFilterBy = new ArrayList<>();
     private String selectedSortBy = "";
+
+    // Cart management
+    private Map<String, CartItem> cartItems = new HashMap<>();
+    private boolean isCartVisible = false;
+    private String currentCartShopId = null;
+    private boolean isCartOperationInProgress = false;
+
+    // Track if menus are loaded
+    private boolean menusLoaded = false;
+
+    // Cart item class
+    private static class CartItem {
+        String itemId;
+        String itemName;
+        int quantity;
+        double price;
+        String shopId;
+
+        CartItem(String itemId, String itemName, int quantity, double price, String shopId) {
+            this.itemId = itemId;
+            this.itemName = itemName;
+            this.quantity = quantity;
+            this.price = price;
+            this.shopId = shopId;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +101,12 @@ public class ItemsActivity extends Utility {
         setupSearchBar();
         setupRecyclerViews();
         setupSearchRecyclerView();
+        setupBottomCart();
+        fetchCartData();
+        loadInitialData(); // This will now wait for menus to load first
+        fetchCartData();
         loadInitialData();
+        updateCartBadge();
     }
 
     private void initializeViewModel() {
@@ -72,7 +114,6 @@ public class ItemsActivity extends Utility {
     }
 
     private void initializeViews() {
-        // Get data from intent
         shopName = getIntent().getStringExtra("SHOP_NAME");
         shopId = getIntent().getStringExtra("SHOP_ID");
 
@@ -80,75 +121,71 @@ public class ItemsActivity extends Utility {
             currentCategoryName = "All Category";
         }
 
-        // Get stored auth token and location
         authorization = getAuthToken();
         longitude = getLongitude();
         latitude = getLatitude();
 
-        // Set the shop name (not category name) to both titles
         binding.tvNotificationExpanded.setText(shopName);
         binding.tvToolbarTitle.setText(shopName);
         binding.tvCategory.setText(currentCategoryName);
     }
 
     private void setupListeners() {
-        // Back button listener
         binding.backBtn.setOnClickListener(v -> onBackPressed());
 
-        // Cart button listener
         binding.cart.setOnClickListener(v -> {
-            Toast.makeText(this, "Cart clicked", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
         });
 
-        // Search button listeners - open search
         binding.searchBtn.setOnClickListener(v -> openSearch());
         binding.searchBtnToolBar.setOnClickListener(v -> openSearch());
 
-        // Filter button listeners
         binding.filterBtn.setOnClickListener(v -> handleFilterClick());
         binding.filterBtnToolBar.setOnClickListener(v -> handleFilterClick());
 
-        // AppBar collapse listener for toolbar animations
         setupCollapsingToolbar();
     }
 
+    private void setupBottomCart() {
+        binding.bottomCartCard.setVisibility(View.GONE);
+        binding.bottomCartCard.setTranslationY(200f);
+
+        binding.checkoutBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
+        });
+
+    }
+
     private void setupSearchBar() {
-        // Setup SearchView text listener
         binding.searchView.getEditText().addTextChangedListener(new android.text.TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Not needed
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString().trim();
 
-                // Filter immediately as user types
                 if (query.length() > 0) {
                     filterItems(query);
                     binding.searchResultsRecycler.setVisibility(View.VISIBLE);
                 } else {
-                    // Show all items when search is cleared
                     resetSearchFilter();
                     binding.searchResultsRecycler.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void afterTextChanged(android.text.Editable s) {
-                // Not needed
-            }
+            public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Handle SearchView editor action (keyboard search button)
         binding.searchView.getEditText().setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
                 String query = binding.searchView.getText().toString().trim();
                 if (query.length() > 0) {
                     filterItems(query);
                 }
-                // Hide keyboard
                 android.view.inputmethod.InputMethodManager imm =
                         (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
@@ -159,41 +196,28 @@ public class ItemsActivity extends Utility {
             return false;
         });
 
-        // Listen for SearchView visibility changes
         binding.searchView.addTransitionListener((searchView, previousState, newState) -> {
             if (newState == SearchView.TransitionState.HIDDEN) {
-                // Hide SearchView and reset filter when closed
                 binding.searchView.setVisibility(View.GONE);
                 binding.searchView.setText("");
                 resetSearchFilter();
                 binding.searchResultsRecycler.setVisibility(View.GONE);
             } else if (newState == SearchView.TransitionState.SHOWN) {
-                // Show all items initially when search opens
                 resetSearchFilter();
             }
         });
     }
 
     private void openSearch() {
-        // Make SearchView visible and show it
         binding.searchView.setVisibility(View.VISIBLE);
         binding.searchView.show();
-
-        // Optional: Request focus on search input
         binding.searchView.requestFocusAndShowKeyboard();
     }
 
     private void closeSearch() {
-        // Hide the SearchView
         binding.searchView.hide();
-
-        // Clear search text
         binding.searchView.setText("");
-
-        // Reset filter
         resetSearchFilter();
-
-        // Hide results
         binding.searchResultsRecycler.setVisibility(View.GONE);
     }
 
@@ -208,10 +232,8 @@ public class ItemsActivity extends Utility {
                     scrollRange = appBarLayout.getTotalScrollRange();
                 }
 
-                // Calculate the percentage of collapse
                 float percentage = Math.abs(verticalOffset) / (float) scrollRange;
 
-                // Fade in toolbar title when collapsed (starts fading at 60% collapse)
                 if (percentage > 0.6f) {
                     float alpha = (percentage - 0.6f) * 2.5f;
                     binding.tvToolbarTitle.setAlpha(alpha);
@@ -223,11 +245,9 @@ public class ItemsActivity extends Utility {
                     binding.filterBtnToolBar.setAlpha(0f);
                 }
 
-                // Fade out expanded title
                 binding.tvNotificationExpanded.setAlpha(1 - percentage);
                 binding.searchBtn.setAlpha(1 - percentage);
 
-                // Show/hide based on collapse state
                 if (scrollRange + verticalOffset == 0) {
                     binding.tvToolbarTitle.setVisibility(View.VISIBLE);
                     binding.searchBtnToolBar.setVisibility(View.VISIBLE);
@@ -269,9 +289,7 @@ public class ItemsActivity extends Utility {
         });
 
         shopItemAdapter.setOnQuantityChangeListener((item, newQuantity, position) -> {
-            Toast.makeText(this,
-                    item.getName() + " quantity: " + newQuantity,
-                    Toast.LENGTH_SHORT).show();
+            handleQuantityChange(item, newQuantity);
         });
 
         binding.rcNotification.setAdapter(shopItemAdapter);
@@ -288,27 +306,443 @@ public class ItemsActivity extends Utility {
         binding.searchResultsRecycler.setAdapter(searchAdapter);
 
         searchAdapter.setOnItemClickListener((item, position) -> {
-            // Close search and handle item click
             closeSearch();
             Toast.makeText(this, "Clicked: " + item.getName(), Toast.LENGTH_SHORT).show();
         });
 
         searchAdapter.setOnQuantityChangeListener((item, newQuantity, position) -> {
-            Toast.makeText(this,
-                    item.getName() + " quantity: " + newQuantity,
-                    Toast.LENGTH_SHORT).show();
+            handleQuantityChange(item, newQuantity);
         });
 
         binding.searchResultsRecycler.setVisibility(View.GONE);
     }
 
+
+    private void fetchCartData() {
+        viewModel.getCart(authorization).observe(this, response -> {
+            if (response != null && response.data != null && response.data.getStatus() == 1) {
+                CartResponse.Data cartData = response.data.getData();
+
+                if (cartData != null && cartData.getCart() != null) {
+                    CartResponse.Cart cart = cartData.getCart();
+
+                    if (cart.getShop_id() != 0) {
+                        currentCartShopId = String.valueOf(cart.getShop_id());
+                    }
+
+                    // ✅ STORE cart count and subtotal from API
+                    apiCartItemCount = cartData.getCart_item_count();
+                    apiCartSubtotal = Double.parseDouble(String.valueOf(cartData.getSub_total()));
+
+                    pref.setPrefInteger(this, pref.cart_count, apiCartItemCount);
+
+                    if (cart.getCart_items() != null && !cart.getCart_items().isEmpty()) {
+                        loadCartItemsFromResponse(cart.getCart_items());
+                    } else {
+                        // Cart is empty
+                        cartItems.clear();
+                        currentCartShopId = null;
+                        apiCartItemCount = 0;
+                        apiCartSubtotal = 0.0;
+                        updateCartUI();
+                    }
+
+                    updateCartBadge();
+                }
+            } else {
+                // Clear cart if API returns error or empty cart
+                cartItems.clear();
+                currentCartShopId = null;
+                apiCartItemCount = 0;
+                apiCartSubtotal = 0.0;
+                pref.setPrefInteger(this, pref.cart_count, 0);
+                updateCartUI();
+                updateCartBadge();
+            }
+        });
+    }
+    private void loadCartItemsFromResponse(ArrayList<CartResponse.CartItem> apiCartItems) {
+        cartItems.clear();
+
+        for (CartResponse.CartItem apiItem : apiCartItems) {
+            if (apiItem.getItem() != null) {
+                String itemId = String.valueOf(apiItem.getItem_id());
+                String itemName = apiItem.getItem().getName();
+                int quantity = 0;
+
+                try {
+                    quantity = Integer.parseInt(apiItem.getQuantity());
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
+                double price = 0.0;
+                try {
+                    String offerPrice = apiItem.getItem().getOffer_price();
+                    String originalPrice = apiItem.getItem().getAmount();
+
+                    if (offerPrice != null && !offerPrice.isEmpty()
+                            && !offerPrice.equals("0") && !offerPrice.equals("0.00")) {
+                        price = Double.parseDouble(offerPrice);
+                    } else {
+                        price = Double.parseDouble(originalPrice);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
+                String itemShopId = String.valueOf(apiItem.getShop_id());
+
+                cartItems.put(itemId, new CartItem(itemId, itemName, quantity, price, itemShopId));
+            }
+        }
+
+        updateCartUI();
+        syncAdapterWithCart();
+    }
+
+    private void syncAdapterWithCart() {
+        Map<String, Integer> quantities = new HashMap<>();
+        for (Map.Entry<String, CartItem> entry : cartItems.entrySet()) {
+            quantities.put(entry.getKey(), entry.getValue().quantity);
+        }
+
+        shopItemAdapter.setItemQuantities(quantities);
+        searchAdapter.setItemQuantities(quantities);
+    }
+
+    private void clearCartCompletely(ShopItemResponse.Datum item) {
+        isCartOperationInProgress = true;
+        showProgress();
+
+        AddToCartModel model = new AddToCartModel();
+        model.setItem_id(String.valueOf(item.getId()));
+
+        CartItem cartItem = cartItems.get(String.valueOf(item.getId()));
+        if (cartItem != null) {
+            model.setQuantity(String.valueOf(cartItem.quantity));
+        } else {
+            model.setQuantity("1");
+        }
+
+        model.setType("remove");
+        model.setAdded_modifier_id(new ArrayList<>());
+
+        viewModel.updateCart(authorization, model).observe(this, response -> {
+            isCartOperationInProgress = false;
+            hideProgress();
+
+            // ✅ CLEAR CART REGARDLESS OF RESPONSE
+            cartItems.clear();
+            currentCartShopId = null;
+            pref.setPrefInteger(this, pref.cart_count, 0);
+
+            hideCartWithAnimation();
+            updateCartUI();
+            syncAdapterWithCart();
+            refreshCurrentCategory();
+
+            Toast.makeText(this, "Cart cleared", Toast.LENGTH_SHORT).show();
+        });
+    }
+    private void handleQuantityChange(ShopItemResponse.Datum item, int newQuantity) {
+        if (isCartOperationInProgress) {
+            Toast.makeText(this, "Please wait...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String itemId = String.valueOf(item.getId());
+
+        // Check if this is a new shop
+        if (currentCartShopId != null && !currentCartShopId.equals(shopId) && newQuantity > 0) {
+            showDifferentShopDialog(item, newQuantity);
+            return;
+        }
+
+        double price = getItemPrice(item);
+
+        // Get current quantity from cart
+        int currentQuantity = 0;
+        if (cartItems.containsKey(itemId)) {
+            currentQuantity = cartItems.get(itemId).quantity;
+        }
+
+        // Determine if increasing or decreasing
+        boolean isIncreasing = newQuantity > currentQuantity;
+        boolean itemExistsInCart = cartItems.containsKey(itemId);
+
+        if (newQuantity > 0) {
+            if (itemExistsInCart) {
+                updateCartItem(item, 1, price, false, isIncreasing);
+            } else {
+                addCartItem(item, newQuantity, price, false);
+            }
+        } else {
+            // FIXED: Check if this is the last item in cart
+            if (itemExistsInCart) {
+                CartItem cartItem = cartItems.get(itemId);
+                boolean isLastItem = (cartItem.quantity == 1 && cartItems.size() == 1);
+
+                if (isLastItem) {
+                    // For last item, clear cart directly
+                    clearCartCompletely(item);
+                } else {
+                    removeCartItem(item);
+                }
+            }
+        }
+    }
+
+    private void showDifferentShopDialog(ShopItemResponse.Datum item, int newQuantity) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Replace cart item?")
+                .setMessage("Your cart contains items from different shop. Do you want to discard the selection and add this item?")
+                .setPositiveButton("Yes, Replace", (dialog, which) -> {
+                    double price = getItemPrice(item);
+                    addCartItem(item, newQuantity, price, true);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                    syncAdapterWithCart();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void addCartItem(ShopItemResponse.Datum item, int quantity, double price, boolean forceAdd) {
+        isCartOperationInProgress = true;
+        showProgress();
+
+        AddToCartModel model = new AddToCartModel();
+        model.setItem_id(String.valueOf(item.getId()));
+        model.setQuantity(String.valueOf(quantity));
+        model.setForce_add(forceAdd ? "1" : "0");
+        model.setAdded_modifier_id(new ArrayList<>());
+
+        viewModel.addToCart(authorization, model).observe(this, response -> {
+            isCartOperationInProgress = false;
+            hideProgress();
+
+            if (response != null && response.data != null && response.data.getStatus() == 1) {
+
+               fetchCartData();
+
+                String itemId = String.valueOf(item.getId());
+
+                if (forceAdd) {
+                    cartItems.clear();
+                }
+
+                cartItems.put(itemId, new CartItem(itemId, item.getName(), quantity, price, shopId));
+                currentCartShopId = shopId;
+
+                updateCartUI();
+                syncAdapterWithCart();
+                Toast.makeText(this, item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+
+                refreshCurrentCategory();
+            } else {
+                String message = response != null && response.message != null ?
+                        response.message : "Failed to add item";
+                showError(message);
+                syncAdapterWithCart();
+            }
+        });
+    }
+    // FIXED: Update cart item with hardcoded quantity of 1
+
+    private void updateCartItem(ShopItemResponse.Datum item, int hardcodedQuantity, double price, boolean isRemove, boolean isIncreasing) {
+        isCartOperationInProgress = true;
+        showProgress();
+
+        AddToCartModel model = new AddToCartModel();
+        model.setItem_id(String.valueOf(item.getId()));
+        model.setQuantity("1");
+
+        if (isRemove) {
+            model.setType("remove");
+        } else {
+            model.setType(isIncreasing ? "add" : "remove");
+        }
+
+        model.setAdded_modifier_id(new ArrayList<>());
+
+        viewModel.updateCart(authorization, model).observe(this, response -> {
+            isCartOperationInProgress = false;
+            hideProgress();
+
+            if (response != null && response.data != null && response.data.getStatus() == 1) {
+                CartResponse.Data cartData = response.data.getData();
+
+                if (cartData != null) {
+                    // ✅ UPDATE cart count and subtotal from API response
+                    apiCartItemCount = cartData.getCart_item_count();
+                    if (cartData.getCart() != null) {
+                        apiCartSubtotal = Double.parseDouble(String.valueOf(cartData.getSub_total()));
+                    }
+                    pref.setPrefInteger(this, pref.cart_count, apiCartItemCount);
+                }
+
+                String itemId = String.valueOf(item.getId());
+
+                if (isRemove) {
+                    cartItems.remove(itemId);
+                    if (cartItems.isEmpty()) {
+                        currentCartShopId = null;
+                        apiCartItemCount = 0;
+                        apiCartSubtotal = 0.0;
+                        hideCartWithAnimation();
+                    }
+                    Toast.makeText(this, item.getName() + " removed from cart", Toast.LENGTH_SHORT).show();
+                } else {
+                    CartItem existingItem = cartItems.get(itemId);
+                    if (existingItem != null) {
+                        int newQuantity = isIncreasing ? existingItem.quantity + 1 : existingItem.quantity - 1;
+
+                        if (newQuantity > 0) {
+                            cartItems.put(itemId, new CartItem(itemId, item.getName(), newQuantity, price, shopId));
+                            Toast.makeText(this, item.getName() + " updated", Toast.LENGTH_SHORT).show();
+                        } else {
+                            cartItems.remove(itemId);
+                            if (cartItems.isEmpty()) {
+                                currentCartShopId = null;
+                                apiCartItemCount = 0;
+                                apiCartSubtotal = 0.0;
+                                hideCartWithAnimation();
+                            }
+                            Toast.makeText(this, item.getName() + " removed from cart", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                updateCartUI();
+                syncAdapterWithCart();
+                refreshCurrentCategory();
+            } else {
+                String message = response != null && response.message != null ?
+                        response.message : "Failed to update item";
+                showError(message);
+                syncAdapterWithCart();
+            }
+        });
+    }
+
+      private void removeCartItem(ShopItemResponse.Datum item) {
+        // Pass true for isRemove parameter to set type="remove"
+        updateCartItem(item, 1, 0, true, false);
+      }
+
+    private double getItemPrice(ShopItemResponse.Datum item) {
+        try {
+            String offerPrice = item.getOffer_price();
+            String originalPrice = item.getAmount();
+
+            if (offerPrice != null && !offerPrice.isEmpty()
+                    && !offerPrice.equals("0") && !offerPrice.equals("0.00")) {
+                return Double.parseDouble(offerPrice);
+            } else {
+                return Double.parseDouble(originalPrice);
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
+    private void updateCartUI() {
+        // Check if cart is empty first
+        if (cartItems.isEmpty()) {
+            hideCartWithAnimation();
+            currentCartShopId = null;
+            apiCartItemCount = 0;
+            apiCartSubtotal = 0.0;
+            updateCartBadge();
+            return;
+        }
+
+        boolean cartBelongsToCurrentShop = currentCartShopId != null && currentCartShopId.equals(shopId);
+
+        if (!cartBelongsToCurrentShop) {
+            hideCartWithAnimation();
+            return;
+        }
+
+        // ✅ USE ONLY API VALUES from cart response (no local calculation)
+        int totalItems = apiCartItemCount;
+        double totalPrice = apiCartSubtotal;
+
+        // Double check if items are actually present
+        if (totalItems == 0) {
+            hideCartWithAnimation();
+            cartItems.clear();
+            currentCartShopId = null;
+            apiCartItemCount = 0;
+            apiCartSubtotal = 0.0;
+            updateCartBadge();
+            return;
+        }
+
+        String itemText = totalItems + (totalItems == 1 ? " Item" : " Items");
+        String priceText = String.format("₹ %.2f", totalPrice);
+
+        binding.cartItemsCount.setText(itemText);
+        binding.cartTotalPrice.setText(priceText);
+        binding.cartTotalPriceBottom.setText(priceText);
+
+        // ✅ DO NOT SAVE TO PREF HERE - it's already saved from API responses
+        updateCartBadge();
+
+        if (!isCartVisible) {
+            showCartWithAnimation();
+        }
+    }
+    private void showCartWithAnimation() {
+        binding.bottomCartCard.setVisibility(View.VISIBLE);
+
+        binding.bottomCartCard.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(300)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        isCartVisible = true;
+                    }
+                })
+                .start();
+    }
+
+    private void hideCartWithAnimation() {
+        binding.bottomCartCard.animate()
+                .translationY(200f)
+                .alpha(0f)
+                .setDuration(300)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        binding.bottomCartCard.setVisibility(View.GONE);
+                        isCartVisible = false;
+
+                        // ADD THIS: Clear cart count when cart is hidden
+                        if (cartItems.isEmpty()) {
+                            pref.setPrefInteger(ItemsActivity.this, pref.cart_count, 0);
+                        }
+                    }
+                })
+                .start();
+    }
+    // FIXED: Load initial data properly - first load menus, then items
     private void loadInitialData() {
         showProgress();
-        loadShopItems(shopId, currentMenuId, selectedFilterBy, selectedSortBy);
+        // Load items without menu filter first to get all items and menus
+        loadShopItems(shopId, "", selectedFilterBy, selectedSortBy);
     }
 
     private void loadShopItems(String shopId, String menuId, List<String> filterBy, String sortBy) {
-        // Ensure filterBy and sortBy are not null
         List<String> finalFilterBy = (filterBy != null && !filterBy.isEmpty()) ? filterBy : new ArrayList<>();
         String finalSortBy = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "";
 
@@ -335,16 +769,24 @@ public class ItemsActivity extends Utility {
     }
 
     private void handleSuccessResponse(ShopItemResponse response) {
-        // Update menus/categories
+        // FIXED: Handle menu loading properly
         if (response.data.getMenus() != null && !response.data.getMenus().isEmpty()) {
-            boolean menusAlreadyLoaded = horizontalAdapter.getItemCount() > 0;
-
-            if (!menusAlreadyLoaded) {
+            if (!menusLoaded) {
+                // First time loading menus
                 horizontalAdapter.updateMenus(response.data.getMenus());
                 horizontalAdapter.setSelectedPosition(0);
-                currentCategoryName = response.data.getMenus().get(0).getName();
-                currentMenuId = String.valueOf(response.data.getMenus().get(0).getId());
+
+                // FIXED: Set the first menu as current and load its items
+                ShopItemResponse.Menu firstMenu = response.data.getMenus().get(0);
+                currentCategoryName = firstMenu.getName();
+                currentMenuId = String.valueOf(firstMenu.getId());
                 binding.tvCategory.setText(currentCategoryName);
+
+                menusLoaded = true;
+
+                // Load items for the first category
+                loadShopItems(shopId, currentMenuId, selectedFilterBy, selectedSortBy);
+                return; // Exit here, wait for next response with filtered items
             }
 
             binding.rcCategory.setVisibility(View.VISIBLE);
@@ -352,7 +794,6 @@ public class ItemsActivity extends Utility {
             binding.rcCategory.setVisibility(View.GONE);
         }
 
-        // Update shop items
         if (response.data.getItems() != null && !response.data.getItems().data.isEmpty()) {
             shopItemAdapter.setShopItems(response.data.getItems().data);
         } else {
@@ -360,20 +801,23 @@ public class ItemsActivity extends Utility {
         }
 
         updateEmptyState();
+        updateCartBadge();
     }
 
     private void onCategorySelected(ShopItemResponse.Menu menu) {
         currentCategoryName = menu.getName();
         currentMenuId = String.valueOf(menu.getId());
 
-        // Update only the category text, NOT the toolbar title
         binding.tvCategory.setText(currentCategoryName);
-
-        // Expand the AppBarLayout to show category change
         binding.appBarLayout.setExpanded(true, true);
 
-        // Load items for selected menu with current filters
         showProgress();
+        loadShopItems(shopId, currentMenuId, selectedFilterBy, selectedSortBy);
+    }
+
+    // FIXED: New method to refresh current category without changing selection
+    private void refreshCurrentCategory() {
+        // Don't show progress, just silently refresh
         loadShopItems(shopId, currentMenuId, selectedFilterBy, selectedSortBy);
     }
 
@@ -394,7 +838,6 @@ public class ItemsActivity extends Utility {
 
         searchAdapter.setShopItems(filteredItemList);
 
-        // Show/hide RecyclerView based on results
         if (filteredItemList.isEmpty()) {
             binding.searchResultsRecycler.setVisibility(View.GONE);
         } else {
@@ -420,11 +863,7 @@ public class ItemsActivity extends Utility {
     private void showFilterBottomSheet() {
         FilterBottomSheet bottomSheet = new FilterBottomSheet();
 
-        // Pass current selections to the bottom sheet if needed
-        // You can add methods to FilterBottomSheet to set initial values
-
         bottomSheet.setFilterListener((filterBy, sortBy) -> {
-            // Update the filter and sort parameters
             if(filterBy != null){
                 selectedFilterBy.add(filterBy);
             }else{
@@ -432,7 +871,6 @@ public class ItemsActivity extends Utility {
             }
             selectedSortBy = sortBy != null ? sortBy : "";
 
-            // Log the selections
             String filterString = selectedFilterBy.isEmpty() ? "None" : selectedFilterBy.toString();
             String sortString = selectedSortBy.isEmpty() ? "None" : selectedSortBy;
 
@@ -440,7 +878,6 @@ public class ItemsActivity extends Utility {
                     "Filter: " + filterString + "\nSort: " + sortString,
                     Toast.LENGTH_SHORT).show();
 
-            // Apply the filters
             applyFiltersAndSort();
         });
 
@@ -448,7 +885,6 @@ public class ItemsActivity extends Utility {
     }
 
     private void applyFiltersAndSort() {
-        // Reload items with new filter/sort parameters
         showProgress();
         loadShopItems(shopId, currentMenuId, selectedFilterBy, selectedSortBy);
     }
@@ -458,8 +894,6 @@ public class ItemsActivity extends Utility {
         selectedSortBy = "";
 
         Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show();
-
-        // Reload items without filters
         applyFiltersAndSort();
     }
 
@@ -505,7 +939,6 @@ public class ItemsActivity extends Utility {
         return pref.getPrefString(this, pref.user_lat);
     }
 
-    // Getters for current filter/sort state
     public List<String> getSelectedFilterBy() {
         return selectedFilterBy;
     }
@@ -518,15 +951,47 @@ public class ItemsActivity extends Utility {
         return !selectedFilterBy.isEmpty() || !selectedSortBy.isEmpty();
     }
 
+    public double getTotalCartPrice() {
+        double total = 0.0;
+        for (CartItem item : cartItems.values()) {
+            total += (item.price * item.quantity);
+        }
+        return total;
+    }
+
+    private void updateCartBadge() {
+        int count = pref.getPrefInteger(this, pref.cart_count); // your shared pref key
+
+        if (binding.cartBadge == null) return;
+
+        if (count > 0) {
+            binding.cartBadge.setVisibility(View.VISIBLE);
+
+            if (count > 99)
+                binding.cartBadge.setText("99+");
+            else
+                binding.cartBadge.setText(String.valueOf(count));
+
+        } else {
+            binding.cartBadge.setVisibility(View.GONE);
+        }
+    }
+
+
     @Override
     public void onBackPressed() {
-        // Close search if it's open
         if (binding.searchView.getVisibility() == View.VISIBLE) {
             closeSearch();
             return;
         }
 
         super.onBackPressed();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCartBadge();
+        fetchCartData();
     }
 
     @Override

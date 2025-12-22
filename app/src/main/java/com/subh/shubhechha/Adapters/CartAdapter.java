@@ -1,5 +1,6 @@
 package com.subh.shubhechha.Adapters;
 
+import android.content.Context;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,23 +10,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
-import com.subh.shubhechha.Model.CartItem;
+import com.subh.shubhechha.Model.CartResponse;
 import com.subh.shubhechha.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
-    private List<CartItem> cartItems;
+    private ArrayList<CartResponse.CartItem> cartItems;
     private OnCartItemListener listener;
     private DecimalFormat priceFormat;
 
     // Interface for callbacks
     public interface OnCartItemListener {
-        void onQuantityChanged(CartItem item, int position, int newQuantity);
-        void onDeleteItem(CartItem item, int position);
+        void onQuantityChanged(CartResponse.CartItem item, int position, int newQuantity, boolean isIncreasing);
+        void onDeleteItem(CartResponse.CartItem item, int position);
     }
 
     public CartAdapter(OnCartItemListener listener) {
@@ -44,7 +44,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        CartItem item = cartItems.get(position);
+        CartResponse.CartItem item = cartItems.get(position);
         if (item != null) {
             holder.bind(item, position);
         }
@@ -55,18 +55,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         return cartItems != null ? cartItems.size() : 0;
     }
 
-    public void setCartItems(List<CartItem> items) {
+    public void setCartItems(ArrayList<CartResponse.CartItem> items) {
         if (items != null) {
             this.cartItems = new ArrayList<>(items);
-            notifyDataSetChanged();
+        } else {
+            this.cartItems = new ArrayList<>();
         }
-    }
-
-    public void addItem(CartItem item) {
-        if (item != null) {
-            cartItems.add(item);
-            notifyItemInserted(cartItems.size() - 1);
-        }
+        notifyDataSetChanged();
     }
 
     public void removeItem(int position) {
@@ -77,30 +72,59 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
     }
 
-    public void updateQuantity(int position, int newQuantity) {
-        if (position >= 0 && position < cartItems.size()) {
-            CartItem item = cartItems.get(position);
-            if (item != null) {
-                item.setQuantity(newQuantity);
-                notifyItemChanged(position);
-            }
-        }
-    }
-
-    public List<CartItem> getCartItems() {
+    public ArrayList<CartResponse.CartItem> getCartItems() {
         return new ArrayList<>(cartItems);
     }
 
     public double getTotalAmount() {
         double total = 0;
         if (cartItems != null) {
-            for (CartItem item : cartItems) {
-                if (item != null) {
-                    total += item.getTotalPrice();
+            for (CartResponse.CartItem item : cartItems) {
+                if (item != null && item.getItem() != null) {
+                    try {
+                        int quantity = Integer.parseInt(item.getQuantity());
+                        double price = getItemPrice(item);
+                        total += (price * quantity);
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
         return total;
+    }
+
+    private double getItemPrice(CartResponse.CartItem cartItem) {
+        if (cartItem == null || cartItem.getItem() == null) return 0.0;
+
+        try {
+            CartResponse.Item item = cartItem.getItem();
+            String offerPrice = item.getOffer_price();
+            String originalPrice = item.getAmount();
+
+            if (offerPrice != null && !offerPrice.isEmpty()
+                    && !offerPrice.equals("0") && !offerPrice.equals("0.00")) {
+                return Double.parseDouble(offerPrice);
+            } else if (originalPrice != null && !originalPrice.isEmpty()) {
+                return Double.parseDouble(originalPrice);
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    private boolean hasOffer(CartResponse.CartItem cartItem) {
+        if (cartItem == null || cartItem.getItem() == null) return false;
+
+        try {
+            String offerPrice = cartItem.getItem().getOffer_price();
+            return offerPrice != null && !offerPrice.isEmpty()
+                    && !offerPrice.equals("0") && !offerPrice.equals("0.00");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     class CartViewHolder extends RecyclerView.ViewHolder {
@@ -134,39 +158,83 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
         }
 
-        public void bind(CartItem item, int position) {
-            if (item == null) return;
+        public void bind(CartResponse.CartItem cartItem, int position) {
+            if (cartItem == null || cartItem.getItem() == null) return;
+
+            CartResponse.Item item = cartItem.getItem();
 
             // Set product name
             if (productName != null) {
-                productName.setText(item.getProductName() != null ? item.getProductName() : "");
+                productName.setText(item.getName() != null ? item.getName() : "");
             }
 
-            // Set product description
+            // Set product description (if available in your model)
             if (productDescription != null) {
-                productDescription.setText(item.getProductDescription() != null ? item.getProductDescription() : "");
+                // You might need to add description field to your Item model
+                productDescription.setVisibility(View.GONE);
             }
 
-            // Set original price with strikethrough
-            if (originalPrice != null) {
-                originalPrice.setText("₹ " + priceFormat.format(item.getOriginalPrice()));
-            }
-
-            // Set current price
-            if (currentPrice != null) {
-                currentPrice.setText("₹ " + priceFormat.format(item.getCurrentPrice()));
+            // Get quantity
+            int quantity = 1;
+            try {
+                quantity = Integer.parseInt(cartItem.getQuantity());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
             }
 
             // Set quantity
             if (quantityText != null) {
-                quantityText.setText(String.valueOf(item.getQuantity()));
+                quantityText.setText(String.valueOf(quantity));
             }
 
-            // Load product image using Glide (crash-safe)
+            // Get prices
+            double offerPrice = 0.0;
+            double regularPrice = 0.0;
+
+            try {
+                String offerPriceStr = item.getOffer_price();
+                String regularPriceStr = item.getAmount();
+
+                if (offerPriceStr != null && !offerPriceStr.isEmpty()) {
+                    offerPrice = Double.parseDouble(offerPriceStr);
+                }
+                if (regularPriceStr != null && !regularPriceStr.isEmpty()) {
+                    regularPrice = Double.parseDouble(regularPriceStr);
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+
+            // Display prices based on offer availability
+            if (hasOffer(cartItem)) {
+                // Has offer - show both prices
+                if (originalPrice != null) {
+                    originalPrice.setVisibility(View.VISIBLE);
+                    originalPrice.setText("₹ " + priceFormat.format(regularPrice));
+                }
+                if (currentPrice != null) {
+                    currentPrice.setText("₹ " + priceFormat.format(offerPrice));
+                }
+            } else {
+                // No offer - show only regular price
+                if (originalPrice != null) {
+                    originalPrice.setVisibility(View.GONE);
+                }
+                if (currentPrice != null) {
+                    currentPrice.setText("₹ " + priceFormat.format(regularPrice));
+                }
+            }
+
+            // Load product image using Glide
             if (productImage != null) {
                 try {
-                    Glide.with(itemView.getContext())
-                            .load(item.getImageUrl())
+                    String imageUrl = null;
+                    if (item.getImage_path() != null && !item.getImage_path().isEmpty()) {
+                        imageUrl = item.getImage_path();
+                    }
+
+                    Glide.with(productImage.getContext())
+                            .load(imageUrl)
                             .placeholder(R.drawable.no_image)
                             .error(R.drawable.no_image)
                             .centerCrop()
@@ -178,24 +246,26 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
 
             // Update button states
-            updateButtonStates(item);
+            updateButtonStates(quantity);
 
             // Decrement button click listener
             if (decrementButton != null) {
                 decrementButton.setOnClickListener(v -> {
-                    if (item.canDecrement()) {
-                        int newQuantity = item.getQuantity() - 1;
-                        item.setQuantity(newQuantity);
+                    // FIXED: Get current quantity from TextView instead of using captured variable
+                    int currentQuantity = getCurrentQuantity();
 
-                        // Update UI immediately for smooth experience
+                    if (currentQuantity > 0) {
+                        int newQuantity = currentQuantity - 1;
+
+                        // Update UI immediately
                         if (quantityText != null) {
                             quantityText.setText(String.valueOf(newQuantity));
                         }
-                        updateButtonStates(item);
+                        updateButtonStates(newQuantity);
 
-                        // Notify listener
+                        // Notify listener (isIncreasing = false)
                         if (listener != null) {
-                            listener.onQuantityChanged(item, position, newQuantity);
+                            listener.onQuantityChanged(cartItem, getBindingAdapterPosition(), newQuantity, false);
                         }
                     }
                 });
@@ -204,20 +274,19 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             // Increment button click listener
             if (incrementButton != null) {
                 incrementButton.setOnClickListener(v -> {
-                    if (item.canIncrement()) {
-                        int newQuantity = item.getQuantity() + 1;
-                        item.setQuantity(newQuantity);
+                    // FIXED: Get current quantity from TextView instead of using captured variable
+                    int currentQuantity = getCurrentQuantity();
+                    int newQuantity = currentQuantity + 1;
 
-                        // Update UI immediately for smooth experience
-                        if (quantityText != null) {
-                            quantityText.setText(String.valueOf(newQuantity));
-                        }
-                        updateButtonStates(item);
+                    // Update UI immediately
+                    if (quantityText != null) {
+                        quantityText.setText(String.valueOf(newQuantity));
+                    }
+                    updateButtonStates(newQuantity);
 
-                        // Notify listener
-                        if (listener != null) {
-                            listener.onQuantityChanged(item, position, newQuantity);
-                        }
+                    // Notify listener (isIncreasing = true)
+                    if (listener != null) {
+                        listener.onQuantityChanged(cartItem, getBindingAdapterPosition(), newQuantity, true);
                     }
                 });
             }
@@ -226,25 +295,37 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             if (deleteIcon != null) {
                 deleteIcon.setOnClickListener(v -> {
                     if (listener != null) {
-                        listener.onDeleteItem(item, position);
+                        listener.onDeleteItem(cartItem, getBindingAdapterPosition());
                     }
                 });
             }
         }
 
-        private void updateButtonStates(CartItem item) {
-            if (item == null) return;
+        // FIXED: Helper method to get current quantity from TextView
+        private int getCurrentQuantity() {
+            if (quantityText != null) {
+                try {
+                    String quantityStr = quantityText.getText().toString();
+                    return Integer.parseInt(quantityStr);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            return 0;
+        }
 
+        private void updateButtonStates(int quantity) {
             // Update decrement button state
             if (decrementButton != null) {
-                decrementButton.setEnabled(item.canDecrement());
-                decrementButton.setAlpha(item.canDecrement() ? 1.0f : 0.3f);
+                boolean canDecrement = quantity > 0;
+                decrementButton.setEnabled(canDecrement);
+                decrementButton.setAlpha(canDecrement ? 1.0f : 0.3f);
             }
 
-            // Update increment button state
+            // Increment button is always enabled
             if (incrementButton != null) {
-                incrementButton.setEnabled(item.canIncrement());
-                incrementButton.setAlpha(item.canIncrement() ? 1.0f : 0.3f);
+                incrementButton.setEnabled(true);
+                incrementButton.setAlpha(1.0f);
             }
         }
     }

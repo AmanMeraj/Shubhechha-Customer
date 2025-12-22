@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    android:backgroundTint="@android:color/transparent"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/orange"
+        android:clipToOutline="true"
+       >
+
+        <!-- Location Icon -->
+        <LinearLayout
+            android:layout_margin="12dp"
+            android:id="@+id/icon_container"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/circle_peach2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/img_location"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/subh_location"
+                android:contentDescription="@string/app_name" />
+        </LinearLayout>
+
+        <!-- Address Text -->
+        <TextView
+            android:padding="12dp"
+            android:id="@+id/tv_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:text="International Airport, Motilal Colony, Rajbari, Dum Dum, West Bengal kol - 700079."
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:fontFamily="@font/inter_medium"
+            android:lineSpacingExtra="2dp"
+            app:layout_constraintStart_toEndOf="@id/icon_container"
+            app:layout_constraintTop_toTopOf="@id/icon_container"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tv_address_tag" />
+
+        <!-- Address Tag -->
+        <TextView
+            android:id="@+id/tv_address_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="Address 1"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:background="@drawable/address_tag_bg_checkout1"
+            android:fontFamily="@font/inter_semibold"
+            app:layout_constraintTop_toBottomOf="@id/tv_address"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

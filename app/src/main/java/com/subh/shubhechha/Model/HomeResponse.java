@@ -90,6 +90,26 @@ public class HomeResponse {
 
         public ArrayList<Banner> banners;
         public ArrayList<Module> modules;
+
+        public FooterBanners getFooter_banners() {
+            return footer_banners;
+        }
+
+        public void setFooter_banners(FooterBanners footer_banners) {
+            this.footer_banners = footer_banners;
+        }
+
+        public FooterBanners footer_banners;
+
+        public int getCart_count() {
+            return cart_count;
+        }
+
+        public void setCart_count(int cart_count) {
+            this.cart_count = cart_count;
+        }
+
+        public int cart_count;
     }
 
     public class Module{
@@ -128,6 +148,13 @@ public class HomeResponse {
         public int id;
         public String name;
         public String image;
+        public String image_path;
+    }
+
+    public class FooterBanners{
+        public int id;
+        public String image;
+        public Object module_service;
         public String image_path;
     }
 

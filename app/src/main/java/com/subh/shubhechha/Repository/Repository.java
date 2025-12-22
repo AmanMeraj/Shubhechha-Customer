@@ -9,10 +9,15 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 
+import com.subh.shubhechha.Model.AddToCartModel;
+import com.subh.shubhechha.Model.CartResponse;
+import com.subh.shubhechha.Model.CheckoutModel;
 import com.subh.shubhechha.Model.GenericPostResponse;
 import com.subh.shubhechha.Model.GetAddressResponse;
 import com.subh.shubhechha.Model.HomeResponse;
 import com.subh.shubhechha.Model.LoginResponse;
+import com.subh.shubhechha.Model.OrderDetails;
+import com.subh.shubhechha.Model.OrderModel;
 import com.subh.shubhechha.Model.PostAddress;
 import com.subh.shubhechha.Model.PostAddressResponse;
 import com.subh.shubhechha.Model.ProfileResponse;
@@ -152,6 +157,36 @@ public class Repository {
         }
     }
 
+    public LiveData<ApiResponse<GenericPostResponse>> addToCart(String auth, AddToCartModel addToCartModel) {
+        Call<GenericPostResponse> call = apiRequest.addToCart(auth,addToCartModel);
+        return performRequest(call);
+    }
+
+    public LiveData<ApiResponse<CartResponse>> updateCart(String auth, AddToCartModel addToCartModel) {
+        Call<CartResponse> call = apiRequest.updateCart(auth, addToCartModel);
+        return performRequest(call);
+    }
+
+    public LiveData<ApiResponse<CartResponse>> getCart(String auth) {
+        Call<CartResponse> call = apiRequest.getCart(auth);
+        return performRequest(call);
+    }
+
+    public LiveData<ApiResponse<OrderModel>> getOrdes(String auth) {
+        Call<OrderModel> call = apiRequest.getOrders(auth);
+        return performRequest(call);
+    }
+    public LiveData<ApiResponse<OrderDetails>> getOrderDetails(String auth, int orderId) {
+        Call<OrderDetails> call = apiRequest.getOrderDetails(auth, orderId);
+        return performRequest(call);
+    }
+
+    public LiveData<ApiResponse<GenericPostResponse>> deleteCartItem(String auth, int itemId) {
+        Call<GenericPostResponse> call = apiRequest.deleteCartItem(auth, itemId);
+        return performRequest(call);
+    }
+
+
     /**
      * Convert URI to File (null-safe)
      */
@@ -202,6 +237,10 @@ public class Repository {
             value = "";
         }
         return RequestBody.create(MediaType.parse("text/plain"), value);
+    }
+    public LiveData<ApiResponse<GenericPostResponse>> checkout(String auth, CheckoutModel checkoutModel) {
+        Call<GenericPostResponse> call = apiRequest.checkout(auth,checkoutModel);
+        return performRequest(call);
     }
 
 

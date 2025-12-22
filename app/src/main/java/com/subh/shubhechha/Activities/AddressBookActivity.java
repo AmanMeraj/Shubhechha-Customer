@@ -22,11 +22,12 @@ import com.subh.shubhechha.Model.GetAddressResponse;
 import com.subh.shubhechha.R;
 import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.ActivityAddressBookBinding;
+import com.subh.shubhechha.utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddressBookActivity extends AppCompatActivity {
+public class AddressBookActivity extends Utility {
 
     ActivityAddressBookBinding binding;
     AddressAdapter adapter;
@@ -62,8 +63,7 @@ public class AddressBookActivity extends AppCompatActivity {
     }
 
     private void initSharedPreferences() {
-        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-        authToken = "Bearer " + sharedPreferences.getString("token", "");
+        authToken = "Bearer " + pref.getPrefString(this,pref.user_token);
     }
 
     private void initViews() {
@@ -246,16 +246,15 @@ public class AddressBookActivity extends AppCompatActivity {
 
     private void showEmptyState() {
         // Add empty state view if you have one in your layout
-        if (binding.tvEmptyState != null) {
-            binding.tvEmptyState.setVisibility(View.VISIBLE);
-            binding.tvEmptyState.setText("No addresses found.\nAdd a new address to get started.");
+        if (binding.noAddressRel != null) {
+            binding.noAddressRel.setVisibility(View.VISIBLE);
         }
         binding.rcAddressBook.setVisibility(View.GONE);
     }
 
     private void hideEmptyState() {
-        if (binding.tvEmptyState != null) {
-            binding.tvEmptyState.setVisibility(View.GONE);
+        if (binding.noAddressRel != null) {
+            binding.noAddressRel.setVisibility(View.GONE);
         }
         binding.rcAddressBook.setVisibility(View.VISIBLE);
     }

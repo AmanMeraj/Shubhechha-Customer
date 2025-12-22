@@ -1,9 +1,14 @@
 package com.subh.shubhechha.Retrofit;
 
+import com.subh.shubhechha.Model.AddToCartModel;
+import com.subh.shubhechha.Model.CartResponse;
+import com.subh.shubhechha.Model.CheckoutModel;
 import com.subh.shubhechha.Model.GenericPostResponse;
 import com.subh.shubhechha.Model.GetAddressResponse;
 import com.subh.shubhechha.Model.HomeResponse;
 import com.subh.shubhechha.Model.LoginResponse;
+import com.subh.shubhechha.Model.OrderDetails;
+import com.subh.shubhechha.Model.OrderModel;
 import com.subh.shubhechha.Model.PostAddress;
 import com.subh.shubhechha.Model.PostAddressResponse;
 import com.subh.shubhechha.Model.ProfileResponse;
@@ -25,6 +30,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -193,6 +199,52 @@ public interface ApiRequest {
             @Query("menu_id") String menuId,
             @Query("filter_by[]") List<String> filterBy,
             @Query("sort_by") String sortBy
+    );
+
+    @Headers({"Accept: application/json"})
+    @POST("cart")
+    Call<GenericPostResponse> addToCart(
+            @Header("Authorization") String authorization,
+            @Body AddToCartModel addToCartModel
+    );
+
+    @Headers({"Accept: application/json"})
+    @PUT("cart")
+    Call<CartResponse> updateCart(
+            @Header("Authorization") String authorization,
+            @Body AddToCartModel addToCartModel
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("cart")
+    Call<CartResponse> getCart(
+            @Header("Authorization") String authorization
+    );
+
+    @Headers({"Accept: application/json"})
+    @DELETE("cart/item/{id}")
+    Call<GenericPostResponse> deleteCartItem(
+            @Header("Authorization") String authorization,
+            @Path("id") int itemId
+    );
+    @Headers({"Accept: application/json"})
+    @POST("order")
+    Call<GenericPostResponse> checkout(
+            @Header("Authorization") String authorization,
+            @Body CheckoutModel checkoutModel
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("order")
+    Call<OrderModel> getOrders(
+            @Header("Authorization") String authorization
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("order/{id}")
+    Call<OrderDetails> getOrderDetails(
+            @Header("Authorization") String authorization,
+            @Path("id") int orderId
     );
 
 

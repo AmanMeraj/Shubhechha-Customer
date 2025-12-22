@@ -14,13 +14,18 @@ import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.databinding.ItemShopItemRowBinding;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ShopItemAdapter extends RecyclerView.Adapter<ShopItemAdapter.ShopItemViewHolder> {
 
     private List<ShopItemResponse.Datum> shopItems = new ArrayList<>();
     private OnItemClickListener listener;
     private OnQuantityChangeListener quantityListener;
+
+    // Store quantities from cart
+    private Map<String, Integer> itemQuantities = new HashMap<>();
 
     // Click callback
     public interface OnItemClickListener {
@@ -42,6 +47,22 @@ public class ShopItemAdapter extends RecyclerView.Adapter<ShopItemAdapter.ShopIt
 
     public void setShopItems(List<ShopItemResponse.Datum> newItems) {
         this.shopItems = newItems != null ? newItems : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    // Set cart quantities for items
+    public void setItemQuantities(Map<String, Integer> quantities) {
+        this.itemQuantities = quantities != null ? quantities : new HashMap<>();
+        notifyDataSetChanged();
+    }
+
+    // Update single item quantity
+    public void updateItemQuantity(String itemId, int quantity) {
+        if (quantity > 0) {
+            itemQuantities.put(itemId, quantity);
+        } else {
+            itemQuantities.remove(itemId);
+        }
         notifyDataSetChanged();
     }
 
@@ -83,9 +104,11 @@ public class ShopItemAdapter extends RecyclerView.Adapter<ShopItemAdapter.ShopIt
 
         public void bind(ShopItemResponse.Datum item, int position) {
 
-            // Reset quantity
-            currentQuantity = 0;
-            binding.quantityText.setText("0");
+            // Get quantity from cart if exists
+            String itemId = String.valueOf(item.getId());
+            currentQuantity = itemQuantities.containsKey(itemId) ? itemQuantities.get(itemId) : 0;
+
+            binding.quantityText.setText(String.valueOf(currentQuantity));
             updateQuantityVisibility();
 
             // Load image

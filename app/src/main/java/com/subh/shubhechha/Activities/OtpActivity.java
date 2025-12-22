@@ -234,7 +234,7 @@ public class OtpActivity extends Utility {
         if (response.isSuccess() && response.data != null) {
             VerifyOtpResponse otpResponse = response.data;
 
-            if (otpResponse.getStatus() == 200 || otpResponse.getStatus() == 1) {
+            if ( otpResponse.getStatus() == 1) {
                 // Success - OTP verified
                 String message = otpResponse.getMessage() != null ?
                         otpResponse.getMessage() : "OTP verified successfully!";
@@ -315,11 +315,11 @@ public class OtpActivity extends Utility {
                 intent = new Intent(OtpActivity.this, ContainerActivity.class);
 
                 pref.setPrefBoolean(this,pref.login_status,true);
+                pref.setPrefInteger(this,pref.cart_count,otpResponse.getData().getCart_count());
 
                 // Pass user data
                 if (otpResponse.getData() != null) {
                     intent.putExtra("user_name", otpResponse.getData().getName());
-                    intent.putExtra("cart_count", otpResponse.getData().getCart_count());
                 }
 
                 // Clear back stack for existing users

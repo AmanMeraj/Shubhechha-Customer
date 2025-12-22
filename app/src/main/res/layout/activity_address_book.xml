@@ -105,15 +105,18 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <ProgressBar
+            android:elevation="20dp"
             android:visibility="gone"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
             android:id="@+id/progress_bar"
             android:layout_height="wrap_content"/>
         <RelativeLayout
+            android:id="@+id/no_address_rel"
+            android:visibility="gone"
             android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true"
             android:layout_above="@+id/btn_submit"
@@ -132,6 +135,7 @@
                 android:fontFamily="@font/inter_bold"
                 android:id="@+id/tv_empty_state"
                 android:textSize="18sp"
+                android:text="No addresses found.\nAdd a new address to get started."
                 android:gravity="center"
                 android:layout_centerHorizontal="true"
                 android:layout_width="wrap_content"
@@ -148,17 +152,16 @@
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/spacing_normal"
             android:layout_alignParentTop="true"
-            android:paddingBottom="100dp"
-            android:clipToPadding="false"
-            android:layout_above="@id/btn_submit" />
+            android:paddingBottom="10dp"
+            android:clipToPadding="false" />
 
 
         <!-- FIXED Bottom Button -->
         <RelativeLayout
-            android:id="@+id/btn_submit"
+            android:layout_alignParentBottom="true"
+          android:id="@+id/btn_submit"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_alignParentBottom="true"
             android:background="@drawable/add_address_button_bg"
             android:layout_margin="16dp"
             android:elevation="10dp"

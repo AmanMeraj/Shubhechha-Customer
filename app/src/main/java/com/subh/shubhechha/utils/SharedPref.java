@@ -10,6 +10,7 @@ public class SharedPref {
     final public String login_status = "login_status";
     final public String is_intro_shown = "is_intro_shown";
     final public String user_status = "user_status";
+    final public String cart_count = "cart_count";
     final public String user_id = "user_id";
     final public String user_name = "user_name";
     final public String user_password = "password";

@@ -2,7 +2,10 @@ package com.subh.shubhechha.Activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -37,6 +40,9 @@ public class ContainerActivity extends Utility {
 
     ActivityContainerBinding binding;
     private Fragment activeFragment = null;
+    private BroadcastReceiver cartBadgeUpdateReceiver;
+    int cartCount = 0;
+
 
     // Permission request launcher
     private ActivityResultLauncher<String[]> permissionLauncher;
@@ -57,6 +63,8 @@ public class ContainerActivity extends Utility {
 
         // Initialize permission launcher
         initializePermissionLauncher();
+        setupCartBadgeReceiver();
+
 
         // Request permissions
         requestAllPermissions();
@@ -116,7 +124,47 @@ public class ContainerActivity extends Utility {
                 }
             });
         }
+
+        updateCartBadge(cartCount);
     }
+
+    private void setupCartBadgeReceiver() {
+        cartBadgeUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if ("UPDATE_CART_BADGE".equals(intent.getAction())) {
+                     intent.getIntExtra("cart_count", 0);
+                    // Update the cart badge in your UI
+                    updateCartBadge(cartCount);
+                }
+            }
+        };
+
+        // Register the receiver
+        IntentFilter filter = new IntentFilter("UPDATE_CART_BADGE");
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(cartBadgeUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(cartBadgeUpdateReceiver, filter);
+        }
+    }
+    public void updateCartBadge(int count) {
+        // Update your cart badge view here
+        // Example:
+        if (binding.cartBadge != null) {
+            if (count > 0) {
+                binding.cartBadge.setVisibility(View.VISIBLE);
+                if (count > 99) {
+                    binding.cartBadge.setText("99+");
+                } else {
+                    binding.cartBadge.setText(String.valueOf(count));
+                }
+            } else {
+                binding.cartBadge.setVisibility(View.GONE);
+            }
+        }
+    }
+
 
     /**
      * Initialize the permission launcher
@@ -264,6 +312,7 @@ public class ContainerActivity extends Utility {
     }
 
     private void loadFragment(Fragment fragment) {
+        updateCartBadge(cartCount);
         if (activeFragment != null && activeFragment.getClass() == fragment.getClass()) return;
 
         activeFragment = fragment;
@@ -276,4 +325,27 @@ public class ContainerActivity extends Utility {
                 .replace(R.id.contentContainer, fragment)
                 .commit();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh cart badge from SharedPreferences
+        int cartCount = pref.getPrefInteger(this, pref.cart_count);
+        updateCartBadge(cartCount);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister the broadcast receiver
+        if (cartBadgeUpdateReceiver != null) {
+            try {
+                unregisterReceiver(cartBadgeUpdateReceiver);
+            } catch (IllegalArgumentException e) {
+                // Receiver was not registered
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

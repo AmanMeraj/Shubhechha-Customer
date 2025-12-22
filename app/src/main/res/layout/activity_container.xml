@@ -47,21 +47,42 @@
             android:layout_width="wrap_content"
             android:text="Kolkata, Sector V ,Bidhan Nagar"
             android:layout_height="wrap_content"/>
-        <ImageView
-            android:id="@+id/cart"
-            android:padding="7dp"
-            android:src="@drawable/shub_shopping"
+        <FrameLayout
+            android:id="@+id/cartContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_width="40dp"
-            android:layout_height="40dp"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/cart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="7dp"
+                android:src="@drawable/shub_shopping" />
+
+            <TextView
+                android:id="@+id/cartBadge"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:background="@drawable/badge_background"
+                android:visibility="gone"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"/>
+
+        </FrameLayout>
+
         <ImageView
             android:id="@+id/notification"
             android:padding="6dp"
             android:src="@drawable/shub_notification"
-            app:layout_constraintEnd_toStartOf="@+id/cart"
+            app:layout_constraintEnd_toStartOf="@+id/cartContainer"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="40dp"

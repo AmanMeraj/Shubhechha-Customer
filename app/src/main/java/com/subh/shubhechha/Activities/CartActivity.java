@@ -1,5 +1,6 @@
 package com.subh.shubhechha.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -8,23 +9,31 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.subh.shubhechha.Adapters.CartAdapter;
-import com.subh.shubhechha.Model.CartItem;
+import com.subh.shubhechha.Model.AddToCartModel;
+import com.subh.shubhechha.Model.CartResponse;
+import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.ActivityCartBinding;
 import com.subh.shubhechha.utils.Utility;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 public class CartActivity extends Utility implements CartAdapter.OnCartItemListener {
 
     private ActivityCartBinding binding;
     private CartAdapter cartAdapter;
     private DecimalFormat priceFormat;
+    private ViewModel viewModel;
+    private CartResponse.Data cartData;
+
+    private String authorization;
+    private ArrayList<CartResponse.CartItem> cartItems = new ArrayList<>();
+    private boolean isCartOperationInProgress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,11 +50,12 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
                 return insets;
             });
 
+            initializeViewModel();
             initializeViews();
             setupCollapsingToolbar();
             setupRecyclerView();
-            loadCartData();
             setupClickListeners();
+            loadCartData();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,9 +63,14 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
         }
     }
 
+    private void initializeViewModel() {
+        viewModel = new ViewModelProvider(this).get(ViewModel.class);
+    }
+
     private void initializeViews() {
         try {
             priceFormat = new DecimalFormat("#,##0.00");
+            authorization = getAuthToken();
 
             // Setup toolbar back button
             if (binding.backBtn != null) {
@@ -75,7 +90,7 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
                 @Override
                 public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
                     int scrollRange = appBarLayout.getTotalScrollRange();
-                    if (scrollRange == 0) return; // avoid division by zero
+                    if (scrollRange == 0) return;
 
                     float percentage = Math.abs(verticalOffset / (float) scrollRange);
                     if (Float.isNaN(percentage) || Float.isInfinite(percentage)) return;
@@ -90,7 +105,6 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
 
                     if (binding.peachCurveBg != null) {
                         float scale = 1 - (percentage * 0.2f);
-                        // clamp value between 0.8f and 1f for safety
                         scale = Math.max(0.8f, Math.min(1f, scale));
                         binding.peachCurveBg.setScaleY(scale);
                     }
@@ -109,7 +123,6 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
                 }
             });
 
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -117,20 +130,16 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
 
     private void onToolbarCollapsed() {
         // Called when toolbar is fully collapsed
-        // Add any additional animations or state changes here
     }
 
     private void onToolbarExpanded() {
         // Called when toolbar is fully expanded
-        // Add any additional animations or state changes here
     }
 
     private void setupRecyclerView() {
         try {
-            // Initialize adapter
             cartAdapter = new CartAdapter(this);
 
-            // Setup RecyclerView
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
             binding.cartRecyclerView.setLayoutManager(layoutManager);
             binding.cartRecyclerView.setAdapter(cartAdapter);
@@ -140,122 +149,6 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
             e.printStackTrace();
             throw new RuntimeException("Failed to setup RecyclerView", e);
         }
-    }
-
-    private void loadCartData() {
-        try {
-            // Show loading state
-            showLoading(true);
-
-            // Sample data - Replace with your actual data source
-            List<CartItem> cartItems = getSampleCartItems();
-
-            if (cartAdapter != null) {
-                cartAdapter.setCartItems(cartItems);
-                updateEmptyState();
-            }
-
-            // Hide loading
-            showLoading(false);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Failed to load cart items");
-            showLoading(false);
-        }
-    }
-
-    private List<CartItem> getSampleCartItems() {
-        List<CartItem> items = new ArrayList<>();
-
-        items.add(new CartItem(
-                "1",
-                "Mosur Dal",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-                "https://example.com/mosur_dal.jpg",
-                130.00,
-                95.00,
-                3,
-                10
-        ));
-
-        items.add(new CartItem(
-                "2",
-                "Mustard Oil",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-                "https://example.com/mustard_oil.jpg",
-                180.00,
-                150.00,
-                1,
-                5
-        ));
-
-        items.add(new CartItem(
-                "3",
-                "Soybean Oil",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-                "https://example.com/soybean_oil.jpg",
-                230.00,
-                195.00,
-                1,
-                8
-        ));
-
-        items.add(new CartItem(
-                "4",
-                "Rice",
-                "Premium quality basmati rice",
-                "https://example.com/rice.jpg",
-                250.00,
-                220.00,
-                2,
-                15
-        ));
- items.add(new CartItem(
-                "1",
-                "Mosur Dal",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-                "https://example.com/mosur_dal.jpg",
-                130.00,
-                95.00,
-                3,
-                10
-        ));
-
-        items.add(new CartItem(
-                "2",
-                "Mustard Oil",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-                "https://example.com/mustard_oil.jpg",
-                180.00,
-                150.00,
-                1,
-                5
-        ));
-
-        items.add(new CartItem(
-                "3",
-                "Soybean Oil",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-                "https://example.com/soybean_oil.jpg",
-                230.00,
-                195.00,
-                1,
-                8
-        ));
-
-        items.add(new CartItem(
-                "4",
-                "Rice",
-                "Premium quality basmati rice",
-                "https://example.com/rice.jpg",
-                250.00,
-                220.00,
-                2,
-                15
-        ));
-
-        return items;
     }
 
     private void setupClickListeners() {
@@ -274,7 +167,6 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
             // Shop now button (for empty state)
             if (binding.shopNowButton != null) {
                 binding.shopNowButton.setOnClickListener(v -> {
-                    // Navigate to shop/home
                     onBackPressed();
                 });
             }
@@ -283,66 +175,216 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
             e.printStackTrace();
         }
     }
+    private void loadCartData() {
+        showLoading(true);
 
-    @Override
-    public void onQuantityChanged(CartItem item, int position, int newQuantity) {
-        try {
-            if (item == null) {
-                showError("Invalid item");
-                return;
+        viewModel.getCart(authorization).observe(this, response -> {
+            showLoading(false);
+
+            if (response != null && response.data != null && response.data.getStatus() == 1) {
+                cartData = response.data.getData();
+
+                if (cartData != null && cartData.getCart() != null) {
+                    CartResponse.Cart cart = cartData.getCart();
+
+                    // ✅ SAVE CART ITEM COUNT FROM API RESPONSE
+                    pref.setPrefInteger(this, pref.cart_count, cartData.getCart_item_count());
+
+                    if (cart.getCart_items() != null && !cart.getCart_items().isEmpty()) {
+                        cartItems = cart.getCart_items();
+                        cartAdapter.setCartItems(cartItems);
+                        updateOrderSummary(cart);
+                        updateEmptyState();
+                    } else {
+                        cartItems.clear();
+                        cartAdapter.setCartItems(cartItems);
+                        pref.setPrefInteger(this, pref.cart_count, 0);
+                        updateEmptyState();
+                    }
+                } else {
+                    cartItems.clear();
+                    cartAdapter.setCartItems(cartItems);
+                    pref.setPrefInteger(this, pref.cart_count, 0);
+                    updateEmptyState();
+                }
+            } else {
+                cartItems.clear();
+                cartAdapter.setCartItems(cartItems);
+                pref.setPrefInteger(this, pref.cart_count, 0);
+                updateEmptyState();
             }
+        });
+    }
 
-            // TODO: Update the quantity in your backend/database here
-            // updateQuantityInBackend(item.getProductId(), newQuantity);
+    private void updateOrderSummary(CartResponse.Cart cart) {
+        try {
+            // You can add order summary UI updates here if needed
+            // For example: subtotal, tax, delivery fee, total
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Failed to update quantity");
-
-            // Revert the change if update fails
-            if (cartAdapter != null) {
-                cartAdapter.notifyItemChanged(position);
-            }
         }
     }
 
     @Override
-    public void onDeleteItem(CartItem item, int position) {
+    public void onQuantityChanged(CartResponse.CartItem item, int position, int newQuantity, boolean isIncreasing) {
+        if (isCartOperationInProgress) {
+            Toast.makeText(this, "Please wait...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (item == null) {
+            showError("Invalid item");
+            return;
+        }
+
+        // Check if this is the last item being removed
+        int currentQuantity = 0;
         try {
-            if (item == null) {
-                showError("Invalid item");
-                return;
+            currentQuantity = Integer.parseInt(item.getQuantity());
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        boolean isLastItem = (currentQuantity == 1 && !isIncreasing && cartItems.size() == 1);
+
+        if (isLastItem) {
+            // Clear cart completely for last item
+            clearCartCompletely(item, position);
+        } else {
+            // Normal update
+            updateCartItem(item, position, isIncreasing);
+        }
+    }
+
+    @Override
+    public void onDeleteItem(CartResponse.CartItem item, int position) {
+
+        new AlertDialog.Builder(this)
+                .setTitle("Remove Item")
+                .setMessage("Are you sure you want to remove this item?")
+                .setPositiveButton("Remove", (d, w) -> {
+                    removeCartItem(item.getId(), position);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+
+    private void updateCartItem(CartResponse.CartItem item, int position, boolean isIncreasing) {
+        isCartOperationInProgress = true;
+        showLoading(true);
+
+        AddToCartModel model = new AddToCartModel();
+        model.setItem_id(String.valueOf(item.getItem_id()));
+        model.setQuantity("1");
+        model.setType(isIncreasing ? "add" : "remove");
+        model.setAdded_modifier_id(new ArrayList<>());
+
+        viewModel.updateCart(authorization, model).observe(this, response -> {
+            isCartOperationInProgress = false;
+            showLoading(false);
+
+            if (response != null && response.data != null && response.data.getStatus() == 1) {
+                // ✅ SAVE UPDATED CART COUNT FROM API
+                CartResponse.Data updatedCartData = response.data.getData();
+                if (updatedCartData != null) {
+                    pref.setPrefInteger(this, pref.cart_count, updatedCartData.getCart_item_count());
+                }
+
+                loadCartData();
+
+                String itemName = item.getItem() != null ? item.getItem().getName() : "Item";
+                Toast.makeText(this, itemName + " updated", Toast.LENGTH_SHORT).show();
+            } else {
+                String message = response != null && response.message != null ?
+                        response.message : "Failed to update item";
+                showError(message);
+                loadCartData();
             }
+        });
+    }
+    private void removeCartItem(int itemId, int position) {
+        isCartOperationInProgress = true;
+        showLoading(true);
 
-            // Show confirmation dialog
-            new AlertDialog.Builder(this)
-                    .setTitle("Remove Item")
-                    .setMessage("Are you sure you want to remove " + item.getProductName() + " from cart?")
-                    .setPositiveButton("Remove", (dialog, which) -> {
-                        try {
-                            // TODO: Delete from backend/database here
-                            // deleteItemFromBackend(item.getProductId());
+        viewModel.deleteCartItem(authorization, itemId)
+                .observe(this, response -> {
+                    isCartOperationInProgress = false;
+                    showLoading(false);
 
-                            // Remove from adapter
-                            if (cartAdapter != null) {
-                                cartAdapter.removeItem(position);
-                                updateEmptyState();
-                                Toast.makeText(this, "Item removed from cart", Toast.LENGTH_SHORT).show();
+                    boolean success = false;
+                    String serverMsg = null;
+
+                    try {
+                        if (response != null) {
+                            serverMsg = response.message;
+
+                            if (response.data != null) {
+                                try {
+                                    if (response.data.getStatus() == 1) {
+                                        success = true;
+                                        // ✅ SAVE UPDATED CART COUNT FROM API
+                                        loadCartData();
+
+                                    }
+                                } catch (Exception ignored) { }
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            showError("Failed to remove item");
-                        }
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Failed to delete item");
-        }
+                            if (!success && serverMsg != null) {
+                                String lower = serverMsg.toLowerCase();
+                                if (lower.contains("success") || lower.contains("removed")
+                                        || lower.contains("deleted") || lower.contains("cart cleared")
+                                        || lower.contains("item removed")) {
+                                    success = true;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    if (success) {
+                        if (position >= 0 && position < cartAdapter.getItemCount()) {
+                            cartAdapter.removeItem(position);
+                        }
+                        updateEmptyState();
+
+                        Toast.makeText(this,
+                                serverMsg != null && !serverMsg.isEmpty() ? serverMsg : "Item removed",
+                                Toast.LENGTH_SHORT).show();
+
+                        loadCartData();
+                    } else {
+                        loadCartData();
+                    }
+                });
     }
 
+    private void clearCartCompletely(CartResponse.CartItem item, int position) {
+        isCartOperationInProgress = true;
+        showLoading(true);
+
+        AddToCartModel model = new AddToCartModel();
+        model.setItem_id(String.valueOf(item.getItem_id()));
+        model.setQuantity(item.getQuantity());
+        model.setType("remove");
+        model.setAdded_modifier_id(new ArrayList<>());
+
+        viewModel.updateCart(authorization, model).observe(this, response -> {
+            isCartOperationInProgress = false;
+            showLoading(false);
+
+            // Clear local cart regardless of response
+            cartItems.clear();
+            cartAdapter.setCartItems(cartItems);
+            updateEmptyState();
+
+            pref.setPrefInteger(this, pref.cart_count, 0); // ADD THIS LINE
+
+            Toast.makeText(this, "Cart cleared", Toast.LENGTH_SHORT).show();
+        });
+    }
     private void updateEmptyState() {
         try {
             if (cartAdapter != null) {
@@ -375,20 +417,35 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
             e.printStackTrace();
         }
     }
-
     private void proceedToCheckout() {
         try {
-            // TODO: Implement checkout logic
-            // Intent intent = new Intent(this, CheckoutActivity.class);
-            // startActivity(intent);
+            if (cartData == null) {
+                Toast.makeText(this, "Cart data not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            Toast.makeText(this, "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, CheckoutActivity.class);
+
+            // Pass all cart summary data
+            intent.putExtra("cart_item_count", cartData.getCart_item_count());
+            intent.putExtra("sub_total", cartData.getSub_total());
+            intent.putExtra("delivery_charge", cartData.getDelivery_charge());
+            intent.putExtra("discount_amount", cartData.getDiscount_amount());
+            intent.putExtra("packaging_charge", cartData.getPackaging_charge());
+            intent.putExtra("total_tax", cartData.getTotal_tax());
+            intent.putExtra("total", cartData.getTotal());
+            intent.putExtra("gst_on_item_total", cartData.getGst_on_item_total());
+            intent.putExtra("gst_on_packaging_charge", cartData.getGst_on_packaging_charge());
+            intent.putExtra("gst_on_delivery_charge", cartData.getGst_on_delivery_charge());
+
+            startActivity(intent);
 
         } catch (Exception e) {
             e.printStackTrace();
             showError("Failed to proceed to checkout");
         }
     }
+
 
     private void showError(String message) {
         try {
@@ -400,10 +457,13 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
         }
     }
 
+    private String getAuthToken() {
+        return "Bearer " + pref.getPrefString(this, pref.user_token);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Clean up resources
         if (binding != null) {
             binding = null;
         }

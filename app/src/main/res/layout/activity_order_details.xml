@@ -41,6 +41,7 @@
 
     <!-- Fixed Success Banner -->
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/ll_success_banner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

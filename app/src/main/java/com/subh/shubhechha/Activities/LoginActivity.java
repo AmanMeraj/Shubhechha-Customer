@@ -124,7 +124,7 @@ public class LoginActivity extends Utility {
         if (response.isSuccess() && response.data != null) {
             LoginResponse loginResponse = response.data;
 
-            if (loginResponse.getStatus() == 200 || loginResponse.getStatus() == 1) {
+            if ( loginResponse.getStatus() == 1) {
                 // Success
                 showSnackBar(loginResponse.getMessage() != null ?
                         loginResponse.getMessage() : "OTP sent successfully!", true);

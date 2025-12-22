@@ -38,6 +38,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.Task;
+import com.subh.shubhechha.Activities.ContainerActivity;
 import com.subh.shubhechha.Activities.ShopsActivity;
 import com.subh.shubhechha.Adapters.BannerAdapter;
 import com.subh.shubhechha.Adapters.CategoryHorizontalAdapter;
@@ -341,6 +342,18 @@ public class HomeFragment extends Fragment {
         HomeResponse.Data data = homeResponse.getData();
 
         if (data != null) {
+            // ✅ SAVE CART COUNT FROM API RESPONSE
+            try {
+                int cartCount = data.getCart_count();
+                pref.setPrefInteger(requireActivity(), pref.cart_count, cartCount);
+                Log.d(TAG, "Cart count saved: " + cartCount);
+
+                // ✅ NOTIFY PARENT ACTIVITY TO UPDATE BADGE
+                notifyCartBadgeUpdate();
+            } catch (Exception e) {
+                Log.e(TAG, "Error saving cart count", e);
+            }
+
             if (data.getBanners() != null && !data.getBanners().isEmpty()) {
                 setupBannerFromApi(data.getBanners());
             } else {
@@ -355,6 +368,20 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    private void notifyCartBadgeUpdate() {
+        if (getActivity() instanceof ContainerActivity) {
+            // Get the cart count from SharedPreferences
+            int cartCount = pref.getPrefInteger(requireActivity(), pref.cart_count);
+
+            // Update the badge with the count
+            ((ContainerActivity) getActivity()).updateCartBadge(cartCount);
+
+            // Optional: Also send broadcast for any other listeners
+            Intent intent = new Intent("UPDATE_CART_BADGE");
+            intent.putExtra("cart_count", cartCount);
+            requireActivity().sendBroadcast(intent);
+        }
+    }
     private void setupBannerFromApi(ArrayList<HomeResponse.Banner> apiBanners) {
         bannerAdapter = new BannerAdapter(apiBanners);
         bannerAdapter.setOnBannerClickListener((banner, position) -> {

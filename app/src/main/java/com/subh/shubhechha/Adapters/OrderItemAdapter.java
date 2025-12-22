@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.subh.shubhechha.Model.OrderDetails;
 import com.subh.shubhechha.Model.OrderItem;
 import com.subh.shubhechha.databinding.ItemOrderRowBinding;
 
@@ -20,9 +21,15 @@ public class OrderItemAdapter extends BaseAdapter {
         this.orderItems = orderItems;
     }
 
+    public void updateData(List<OrderItem> newOrderItems) {
+        this.orderItems.clear();
+        this.orderItems.addAll(newOrderItems);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
-        return orderItems.size();
+        return orderItems != null ? orderItems.size() : 0;
     }
 
     @Override
