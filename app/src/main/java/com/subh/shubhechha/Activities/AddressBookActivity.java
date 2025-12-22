@@ -63,6 +63,7 @@ public class AddressBookActivity extends Utility {
     }
 
     private void initSharedPreferences() {
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         authToken = "Bearer " + pref.getPrefString(this,pref.user_token);
     }
 
@@ -160,7 +161,7 @@ public class AddressBookActivity extends Utility {
             StringBuilder fullAddress = new StringBuilder();
 
             if (addr.getFlat_number() != null && !addr.getFlat_number().isEmpty()) {
-                fullAddress.append("Flat ").append(addr.getFlat_number()).append(", ");
+                fullAddress.append(addr.getFlat_number()).append(", ");
             }
             if (addr.getFloor() != null && !addr.getFloor().isEmpty()) {
                 fullAddress.append("Floor ").append(addr.getFloor()).append(", ");
@@ -246,15 +247,16 @@ public class AddressBookActivity extends Utility {
 
     private void showEmptyState() {
         // Add empty state view if you have one in your layout
-        if (binding.noAddressRel != null) {
-            binding.noAddressRel.setVisibility(View.VISIBLE);
+        if (binding.tvEmptyState != null) {
+            binding.tvEmptyState.setVisibility(View.VISIBLE);
+            binding.tvEmptyState.setText("No addresses found.\nAdd a new address to get started.");
         }
         binding.rcAddressBook.setVisibility(View.GONE);
     }
 
     private void hideEmptyState() {
-        if (binding.noAddressRel != null) {
-            binding.noAddressRel.setVisibility(View.GONE);
+        if (binding.tvEmptyState != null) {
+            binding.tvEmptyState.setVisibility(View.GONE);
         }
         binding.rcAddressBook.setVisibility(View.VISIBLE);
     }

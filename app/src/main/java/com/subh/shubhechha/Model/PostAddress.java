@@ -110,6 +110,16 @@ public class PostAddress {
     public String building_number;
     public String floor_number;
     public String flat_number;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String city;
     public String receipent_name;
     public String mobile;
     public String address_id;
