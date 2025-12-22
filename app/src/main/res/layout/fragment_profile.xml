@@ -91,7 +91,7 @@
             <LinearLayout
                 android:id="@+id/linear_my_profile"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="4dp"
@@ -113,7 +113,7 @@
                     android:layout_marginStart="16dp"
                     android:text="My Profile"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="13sp"
                     android:fontFamily="@font/inter_bold" />
 
                 <ImageView
@@ -127,7 +127,7 @@
             <LinearLayout
                 android:id="@+id/linear_my_orders"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="4dp"
@@ -149,7 +149,7 @@
                     android:layout_marginStart="16dp"
                     android:text="My Orders"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="13sp"
                     android:fontFamily="@font/inter_bold" />
 
                 <ImageView
@@ -163,7 +163,7 @@
             <LinearLayout
                 android:id="@+id/linear_my_address"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="4dp"
@@ -185,7 +185,7 @@
                     android:layout_marginStart="16dp"
                     android:text="My Address"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="13sp"
                     android:fontFamily="@font/inter_bold" />
 
                 <ImageView
@@ -199,7 +199,7 @@
             <LinearLayout
                 android:id="@+id/linear_my_wallet"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="4dp"
@@ -219,9 +219,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:text="My Wallet"
+                    android:text="FAQ | Terms &amp; Conditions | Privacy Policies"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="12sp"
                     android:fontFamily="@font/inter_bold" />
 
                 <ImageView
@@ -265,20 +265,44 @@
                 android:fontFamily="@font/inter_extrabold"
                 android:paddingEnd="@dimen/spacing_normal" />
         </RelativeLayout>
+
+        <LinearLayout
+            android:layout_below="@+id/linear_logout"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Need Help?"
+                android:textColor="@color/black"
+                android:fontFamily="@font/inter_bold"
+                android:textSize="14sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:text=" Call Us"
+                android:textSize="14sp"
+                android:textColor="#069BF1"
+                android:fontFamily="@font/inter_bold"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
         <FrameLayout
+            android:id="@+id/progressBar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="true"
-            android:id="@+id/progressBar"
+            android:focusable="true"
             android:visibility="gone"
-            android:focusable="true">
+            android:background="#80000000">
 
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:elevation="20dp"
-                 />
+                android:elevation="20dp" />
 
         </FrameLayout>
 

@@ -315,7 +315,6 @@ public class ProfileFragment extends Fragment {
             binding.linearMyWallet.postDelayed(() -> {
                 if (!isAdded() || getActivity() == null) return;
 
-                navigateToWalletFragment();
             }, 300);
         });
 
@@ -329,41 +328,6 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    /**
-     * Navigate to Wallet Fragment
-     */
-    private void navigateToWalletFragment() {
-        if (!isAdded() || getActivity() == null) return;
-
-        try {
-            Fragment fragment = new WalletFragment();
-            FragmentManager fragmentManager = getParentFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-            fragmentTransaction.setCustomAnimations(
-                    R.anim.fade_in,
-                    R.anim.fade_out,
-                    R.anim.fade_in,
-                    R.anim.fade_out
-            );
-
-            fragmentTransaction.replace(R.id.contentContainer, fragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-
-            // Update bottom navigation
-            if (getActivity() instanceof ContainerActivity) {
-                ContainerActivity containerActivity = (ContainerActivity) getActivity();
-                CustomBottomNavigation bottomNav = containerActivity.findViewById(R.id.bottomNavigation);
-                if (bottomNav != null) {
-                    bottomNav.selectTab(1);
-                }
-            }
-        } catch (Exception e) {
-            // Handle fragment transaction errors
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Show logout confirmation dialog

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvAmount"
+    android:paddingHorizontal="30dp"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:layout_margin="4dp"
+    android:gravity="center"
+    android:text="+ 100"
+    android:textColor="#666"
+    android:textSize="16sp"
+    android:textStyle="bold"
+    android:background="@drawable/btn_unselected2"
+    android:clickable="true"
+    android:focusable="true"/>

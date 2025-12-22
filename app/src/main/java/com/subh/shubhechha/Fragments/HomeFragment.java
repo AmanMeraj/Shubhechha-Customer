@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,13 +44,17 @@ import com.subh.shubhechha.Activities.ContainerActivity;
 import com.subh.shubhechha.Activities.ShopsActivity;
 import com.subh.shubhechha.Adapters.BannerAdapter;
 import com.subh.shubhechha.Adapters.CategoryHorizontalAdapter;
+import com.subh.shubhechha.Adapters.FooterAdapter;
 import com.subh.shubhechha.CurvedBottomDrawable;
 import com.subh.shubhechha.Model.HomeResponse;
 import com.subh.shubhechha.R;
 import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.FragmentHomeBinding;
 import com.subh.shubhechha.utils.SharedPref;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
@@ -60,6 +66,7 @@ public class HomeFragment extends Fragment {
 
     // Banner related
     private BannerAdapter bannerAdapter;
+    private FooterAdapter footerAdapter;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
     private ImageView[] indicators;
@@ -73,6 +80,7 @@ public class HomeFragment extends Fragment {
     private ActivityResultLauncher<String[]> locationPermissionLauncher;
     private ActivityResultLauncher<IntentSenderRequest> gpsSettingsLauncher;
     private boolean isLocationObtained = false;
+    private Geocoder geocoder;
 
     private static final int GRID_SPAN_COUNT = 3;
     private static final long AUTO_SCROLL_DELAY = 3000;
@@ -83,6 +91,7 @@ public class HomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setupLocationPermissionLauncher();
         setupGpsSettingsLauncher();
+        geocoder = new Geocoder(requireContext(), Locale.getDefault());
     }
 
     @Override
@@ -105,7 +114,6 @@ public class HomeFragment extends Fragment {
 
         // Check and request location before loading data
         checkAndRequestLocation();
-
     }
 
     private void setupLocationPermissionLauncher() {
@@ -116,13 +124,10 @@ public class HomeFragment extends Fragment {
                     Boolean coarseLocationGranted = result.get(Manifest.permission.ACCESS_COARSE_LOCATION);
 
                     if (fineLocationGranted != null && fineLocationGranted) {
-                        // Fine location permission granted
                         checkGpsSettings();
                     } else if (coarseLocationGranted != null && coarseLocationGranted) {
-                        // Coarse location permission granted
                         checkGpsSettings();
                     } else {
-                        // Permission denied
                         showPermissionDeniedDialog();
                     }
                 }
@@ -134,10 +139,8 @@ public class HomeFragment extends Fragment {
                 new ActivityResultContracts.StartIntentSenderForResult(),
                 result -> {
                     if (result.getResultCode() == android.app.Activity.RESULT_OK) {
-                        // GPS enabled, get location
                         getCurrentLocation();
                     } else {
-                        // User declined to enable GPS, ask again
                         showGpsRequiredDialog();
                     }
                 }
@@ -179,13 +182,11 @@ public class HomeFragment extends Fragment {
                 .checkLocationSettings(builder.build());
 
         task.addOnSuccessListener(locationSettingsResponse -> {
-            // GPS is already enabled
             getCurrentLocation();
         });
 
         task.addOnFailureListener(e -> {
             if (e instanceof ResolvableApiException) {
-                // GPS is not enabled, prompt user to enable it
                 try {
                     ResolvableApiException resolvable = (ResolvableApiException) e;
                     IntentSenderRequest intentSenderRequest = new IntentSenderRequest.Builder(
@@ -207,26 +208,21 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // Optional: Show loading while getting location
-        // showLoading(true);
-
         try {
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(location -> {
                         if (location != null) {
-                            saveLocationToPreferences(location);
-                            loadHomeData();  // This will show loading
+                            saveLocationAndAddress(location);
+                            loadHomeData();
                         } else {
                             requestFreshLocation();
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // showLoading(false);
                         Log.e(TAG, "Failed to get location", e);
                         requestFreshLocation();
                     });
         } catch (SecurityException e) {
-            // showLoading(false);
             Log.e(TAG, "Security exception when getting location", e);
             requestLocationPermission();
         }
@@ -249,7 +245,7 @@ public class HomeFragment extends Fragment {
                 super.onLocationResult(locationResult);
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
-                    saveLocationToPreferences(location);
+                    saveLocationAndAddress(location);
                     fusedLocationClient.removeLocationUpdates(this);
                     if (!isLocationObtained) {
                         isLocationObtained = true;
@@ -267,15 +263,101 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void saveLocationToPreferences(Location location) {
+    private void saveLocationAndAddress(Location location) {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
 
+        // Save coordinates
         pref.setPrefString(requireActivity(), pref.user_lat, String.valueOf(latitude));
         pref.setPrefString(requireActivity(), pref.user_long, String.valueOf(longitude));
 
         Log.d(TAG, "Location saved - Lat: " + latitude + ", Long: " + longitude);
-        Toast.makeText(getContext(), "Location obtained", Toast.LENGTH_SHORT).show();
+
+        // Get and save address
+        getAddressFromLocation(latitude, longitude);
+    }
+
+    private void getAddressFromLocation(double latitude, double longitude) {
+        new Thread(() -> {
+            try {
+                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address address = addresses.get(0);
+
+                    // Build formatted address
+                    StringBuilder addressBuilder = new StringBuilder();
+
+                    // Get specific parts
+                    String subLocality = address.getSubLocality(); // Neighborhood/Area
+                    String locality = address.getLocality(); // City
+                    String subAdminArea = address.getSubAdminArea(); // District
+                    String adminArea = address.getAdminArea(); // State
+                    String postalCode = address.getPostalCode();
+
+                    // Build short address (Area, City)
+                    if (subLocality != null && !subLocality.isEmpty()) {
+                        addressBuilder.append(subLocality);
+                    }
+                    if (locality != null && !locality.isEmpty()) {
+                        if (addressBuilder.length() > 0) addressBuilder.append(", ");
+                        addressBuilder.append(locality);
+                    }
+
+                    String shortAddress = addressBuilder.toString();
+
+                    // Build full address
+                    addressBuilder = new StringBuilder();
+                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                        if (i > 0) addressBuilder.append(", ");
+                        addressBuilder.append(address.getAddressLine(i));
+                    }
+                    String fullAddress = addressBuilder.toString();
+
+                    // Save to preferences
+                    requireActivity().runOnUiThread(() -> {
+                        pref.setPrefString(requireActivity(), pref.user_address,
+                                fullAddress.isEmpty() ? "Location obtained" : fullAddress);
+                        pref.setPrefString(requireActivity(), pref.user_short_address,
+                                shortAddress.isEmpty() ? locality : shortAddress);
+                        pref.setPrefString(requireActivity(), pref.user_city,
+                                locality != null ? locality : "");
+                        pref.setPrefString(requireActivity(), pref.user_state,
+                                adminArea != null ? adminArea : "");
+                        pref.setPrefString(requireActivity(), pref.user_postal_code,
+                                postalCode != null ? postalCode : "");
+
+                        Log.d(TAG, "Address saved: " + fullAddress);
+
+                        // Update address in ContainerActivity
+                        updateAddressInContainer(shortAddress.isEmpty() ? locality : shortAddress);
+
+                        Toast.makeText(getContext(), "Location updated", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    requireActivity().runOnUiThread(() -> {
+                        pref.setPrefString(requireActivity(), pref.user_address, "Location obtained");
+                        pref.setPrefString(requireActivity(), pref.user_short_address, "Current Location");
+                        Log.w(TAG, "No address found for location");
+                        updateAddressInContainer("Current Location");
+                    });
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Geocoder error", e);
+                requireActivity().runOnUiThread(() -> {
+                    pref.setPrefString(requireActivity(), pref.user_address, "Location obtained");
+                    pref.setPrefString(requireActivity(), pref.user_short_address, "Current Location");
+                    updateAddressInContainer("Current Location");
+                });
+            }
+        }).start();
+    }
+
+    private void updateAddressInContainer(String address) {
+        if (getActivity() instanceof ContainerActivity) {
+            ((ContainerActivity) getActivity()).updateAddress(address);
+        }
+
     }
 
     private void showPermissionDeniedDialog() {
@@ -307,12 +389,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadHomeData() {
-        showLoading(true);  // Show progress bar
+        showLoading(true);
         String token = pref.getPrefString(requireActivity(), pref.user_token);
 
         if (token.isEmpty()) {
             Log.e(TAG, "Auth token not found");
-            showLoading(false);  // Hide progress bar
+            showLoading(false);
             Toast.makeText(getContext(), "Please login again", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -320,7 +402,7 @@ public class HomeFragment extends Fragment {
         String authHeader = token.startsWith("Bearer ") ? token : "Bearer " + token;
 
         viewModel.home(authHeader).observe(getViewLifecycleOwner(), response -> {
-            showLoading(false);  // Hide progress bar after response
+            showLoading(false);
 
             if (response != null) {
                 if (response.isSuccess() && response.data != null) {
@@ -342,20 +424,28 @@ public class HomeFragment extends Fragment {
         HomeResponse.Data data = homeResponse.getData();
 
         if (data != null) {
-            // ✅ SAVE CART COUNT FROM API RESPONSE
             try {
                 int cartCount = data.getCart_count();
                 pref.setPrefInteger(requireActivity(), pref.cart_count, cartCount);
                 Log.d(TAG, "Cart count saved: " + cartCount);
-
-                // ✅ NOTIFY PARENT ACTIVITY TO UPDATE BADGE
                 notifyCartBadgeUpdate();
             } catch (Exception e) {
                 Log.e(TAG, "Error saving cart count", e);
             }
+            if(pref.getPrefString(requireActivity(),pref.user_name).isEmpty()||pref.getPrefString(requireActivity(),pref.user_name).matches("")){
+                binding.greetingText.setText("Hii! User");
+            }else{
+                binding.greetingText.setText("Hii! " + pref.getPrefString(requireActivity(),pref.user_name));
+            }
 
             if (data.getBanners() != null && !data.getBanners().isEmpty()) {
                 setupBannerFromApi(data.getBanners());
+            } else {
+                Log.e(TAG, "Banner data is empty");
+            }
+
+            if(data.footer_banners != null ){
+                setupFooterBannerFromApi(data.getFooter_banners());
             } else {
                 Log.e(TAG, "Banner data is empty");
             }
@@ -370,18 +460,15 @@ public class HomeFragment extends Fragment {
 
     private void notifyCartBadgeUpdate() {
         if (getActivity() instanceof ContainerActivity) {
-            // Get the cart count from SharedPreferences
             int cartCount = pref.getPrefInteger(requireActivity(), pref.cart_count);
-
-            // Update the badge with the count
             ((ContainerActivity) getActivity()).updateCartBadge(cartCount);
 
-            // Optional: Also send broadcast for any other listeners
             Intent intent = new Intent("UPDATE_CART_BADGE");
             intent.putExtra("cart_count", cartCount);
             requireActivity().sendBroadcast(intent);
         }
     }
+
     private void setupBannerFromApi(ArrayList<HomeResponse.Banner> apiBanners) {
         bannerAdapter = new BannerAdapter(apiBanners);
         bannerAdapter.setOnBannerClickListener((banner, position) -> {
@@ -417,13 +504,44 @@ public class HomeFragment extends Fragment {
         setupIndicators(apiBanners.size());
         setupAutoScroll(apiBanners.size());
     }
+    private void setupFooterBannerFromApi(HomeResponse.FooterBanners apiBanners) {
+        footerAdapter = new FooterAdapter(apiBanners);
+        footerAdapter.setOnFooterClickListener((banner) -> {
+            Toast.makeText(getContext(),
+                    "Banner: " + banner.getModule_service() + " clicked",
+                    Toast.LENGTH_SHORT).show();
+        });
+
+        binding.footerBannerViewPager.setAdapter(footerAdapter);
+        binding.footerBannerViewPager.setClipToPadding(false);
+        binding.footerBannerViewPager.setClipChildren(false);
+        binding.footerBannerViewPager.setOffscreenPageLimit(3);
+
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int cardWidth = (int) (screenWidth * 0.95f);
+        int padding = (screenWidth - cardWidth) / 2;
+
+        binding.footerBannerViewPager.setPadding(padding, 0, padding, 0);
+
+        CompositePageTransformer transformer = new CompositePageTransformer();
+        transformer.addTransformer(new MarginPageTransformer(6 ));
+        transformer.addTransformer((page, position) -> {
+            float absPosition = Math.abs(position);
+            if (absPosition >= 1) {
+                page.setScaleY(0.82f);
+            } else {
+                float scale = 0.85f + (1 - absPosition) * 0.05f;
+                page.setScaleY(scale);
+            }
+        });
+        binding.footerBannerViewPager.setPageTransformer(transformer);
+    }
 
     private void updateCategoriesFromApi(ArrayList<HomeResponse.Module> apiModules) {
         if (horizontalAdapter != null) {
             horizontalAdapter.updateModules(apiModules);
         }
     }
-
 
     private void showLoading(boolean show) {
         if (binding != null && binding.progressBar != null) {
@@ -559,8 +677,8 @@ public class HomeFragment extends Fragment {
         binding.featuredRecyclerView.setAdapter(horizontalAdapter);
     }
 
-        @Override
-        public void onPause() {
+    @Override
+    public void onPause() {
         super.onPause();
         if (bannerHandler != null && bannerRunnable != null) {
             bannerHandler.removeCallbacks(bannerRunnable);
@@ -574,7 +692,6 @@ public class HomeFragment extends Fragment {
             bannerHandler.postDelayed(bannerRunnable, AUTO_SCROLL_DELAY);
         }
     }
-
 
     @Override
     public void onDestroyView() {
@@ -594,5 +711,6 @@ public class HomeFragment extends Fragment {
         indicators = null;
         fusedLocationClient = null;
         locationCallback = null;
+        geocoder = null;
     }
 }

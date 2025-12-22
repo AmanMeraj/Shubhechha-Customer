@@ -35,6 +35,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/logo"/>
         <TextView
+            android:id="@+id/address"
             android:maxWidth="150dp"
             android:maxLines="1"
             android:ellipsize="end"
@@ -45,7 +46,6 @@
             android:textSize="12sp"
             android:fontFamily="@font/inter_semibold"
             android:layout_width="wrap_content"
-            android:text="Kolkata, Sector V ,Bidhan Nagar"
             android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/cartContainer"

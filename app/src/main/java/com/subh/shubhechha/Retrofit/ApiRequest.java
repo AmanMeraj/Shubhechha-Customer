@@ -17,6 +17,7 @@ import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
+import com.subh.shubhechha.Model.WalletResponse;
 
 import java.util.List;
 
@@ -245,6 +246,12 @@ public interface ApiRequest {
     Call<OrderDetails> getOrderDetails(
             @Header("Authorization") String authorization,
             @Path("id") int orderId
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("wallet")
+    Call<WalletResponse> getWallet(
+            @Header("Authorization") String authorization
     );
 
 

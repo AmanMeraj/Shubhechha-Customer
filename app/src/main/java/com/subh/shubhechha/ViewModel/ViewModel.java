@@ -26,6 +26,7 @@ import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
+import com.subh.shubhechha.Model.WalletResponse;
 import com.subh.shubhechha.Repository.Repository;
 
 import java.util.List;
@@ -101,6 +102,9 @@ public class ViewModel extends AndroidViewModel {
     }
     public LiveData<Repository.ApiResponse<GenericPostResponse>> deleteCartItem(String auth, int itemId) {
         return repository.deleteCartItem(auth, itemId);
+    }
+    public LiveData<Repository.ApiResponse<WalletResponse>> getWallet(String auth) {
+        return repository.getWallet(auth);
     }
 
     public LiveData<Repository.ApiResponse<GenericPostResponse>> checkout(String auth, CheckoutModel checkoutModel) {

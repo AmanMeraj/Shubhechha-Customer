@@ -26,6 +26,7 @@ import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
+import com.subh.shubhechha.Model.WalletResponse;
 import com.subh.shubhechha.Retrofit.ApiRequest;
 import com.subh.shubhechha.Retrofit.RetrofitRequest;
 
@@ -183,6 +184,11 @@ public class Repository {
 
     public LiveData<ApiResponse<GenericPostResponse>> deleteCartItem(String auth, int itemId) {
         Call<GenericPostResponse> call = apiRequest.deleteCartItem(auth, itemId);
+        return performRequest(call);
+    }
+
+    public LiveData<ApiResponse<WalletResponse>> getWallet(String auth) {
+        Call<WalletResponse> call = apiRequest.getWallet(auth);
         return performRequest(call);
     }
 

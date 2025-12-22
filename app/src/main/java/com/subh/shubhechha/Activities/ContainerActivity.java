@@ -43,7 +43,6 @@ public class ContainerActivity extends Utility {
     private BroadcastReceiver cartBadgeUpdateReceiver;
     int cartCount = 0;
 
-
     // Permission request launcher
     private ActivityResultLauncher<String[]> permissionLauncher;
 
@@ -65,9 +64,11 @@ public class ContainerActivity extends Utility {
         initializePermissionLauncher();
         setupCartBadgeReceiver();
 
-
         // Request permissions
         requestAllPermissions();
+
+        // Initialize address from SharedPreferences
+        updateAddressUI();
 
         binding.notification.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,16 +111,13 @@ public class ContainerActivity extends Utility {
             binding.bottomNavigation.setOnTabSelectedListener(position -> {
                 switch (position) {
                     case 0:
-                        binding.toolbar.setVisibility(View.VISIBLE);
                         loadFragment(new HomeFragment());
                         break;
                     case 1:
                         loadFragment(new WalletFragment());
-                        binding.toolbar.setVisibility(View.GONE);
                         break;
                     case 2:
                         loadFragment(new ProfileFragment());
-                        binding.toolbar.setVisibility(View.GONE);
                         break;
                 }
             });
@@ -133,8 +131,7 @@ public class ContainerActivity extends Utility {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if ("UPDATE_CART_BADGE".equals(intent.getAction())) {
-                     intent.getIntExtra("cart_count", 0);
-                    // Update the cart badge in your UI
+                    cartCount = intent.getIntExtra("cart_count", 0);
                     updateCartBadge(cartCount);
                 }
             }
@@ -148,9 +145,8 @@ public class ContainerActivity extends Utility {
             registerReceiver(cartBadgeUpdateReceiver, filter);
         }
     }
+
     public void updateCartBadge(int count) {
-        // Update your cart badge view here
-        // Example:
         if (binding.cartBadge != null) {
             if (count > 0) {
                 binding.cartBadge.setVisibility(View.VISIBLE);
@@ -165,6 +161,36 @@ public class ContainerActivity extends Utility {
         }
     }
 
+    /**
+     * Update address display in the UI
+     * Call this method when address changes
+     */
+    public void updateAddress(String address) {
+        // Save to preferences
+        pref.setPrefString(this, pref.user_short_address, address);
+
+        // Update UI
+        updateAddressUI();
+
+        // Optional: Send broadcast to notify other components
+        Intent intent = new Intent("UPDATE_ADDRESS");
+        intent.putExtra("address", address);
+        sendBroadcast(intent);
+    }
+
+    /**
+     * Update the address TextView in the UI
+     */
+    private void updateAddressUI() {
+        if (binding.address != null) {
+            String shortAddress = pref.getPrefString(this, pref.user_address);
+            if (shortAddress.isEmpty()) {
+                binding.address.setText("Getting location...");
+            } else {
+                binding.address.setText(shortAddress);
+            }
+        }
+    }
 
     /**
      * Initialize the permission launcher
@@ -180,7 +206,6 @@ public class ContainerActivity extends Utility {
                         if (!entry.getValue()) {
                             deniedPermissions.add(entry.getKey());
 
-                            // Check if permission is permanently denied
                             if (!shouldShowRequestPermissionRationale(entry.getKey())) {
                                 permanentlyDeniedPermissions.add(entry.getKey());
                             }
@@ -191,10 +216,8 @@ public class ContainerActivity extends Utility {
                         Toast.makeText(this, "All permissions granted", Toast.LENGTH_SHORT).show();
                     } else {
                         if (!permanentlyDeniedPermissions.isEmpty()) {
-                            // Show dialog to go to settings
                             showPermissionSettingsDialog();
                         } else {
-                            // Show rationale dialog
                             showPermissionRationaleDialog(deniedPermissions);
                         }
                     }
@@ -235,7 +258,6 @@ public class ContainerActivity extends Utility {
 
         // Storage permissions (varies by Android version)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ (API 33+)
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
                     != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES);
@@ -245,13 +267,11 @@ public class ContainerActivity extends Utility {
                 permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO);
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android 6.0 to 12
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE);
             }
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                // WRITE permission only needed on Android 10 and below
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
                     permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -259,7 +279,6 @@ public class ContainerActivity extends Utility {
             }
         }
 
-        // Request permissions if any are missing
         if (!permissionsToRequest.isEmpty()) {
             permissionLauncher.launch(permissionsToRequest.toArray(new String[0]));
         }
@@ -278,7 +297,6 @@ public class ContainerActivity extends Utility {
                         "• Notifications: To keep you updated\n\n" +
                         "Please grant these permissions to continue.")
                 .setPositiveButton("Grant Permissions", (dialog, which) -> {
-                    // Re-request permissions
                     permissionLauncher.launch(deniedPermissions.toArray(new String[0]));
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
@@ -330,8 +348,11 @@ public class ContainerActivity extends Utility {
     protected void onResume() {
         super.onResume();
         // Refresh cart badge from SharedPreferences
-        int cartCount = pref.getPrefInteger(this, pref.cart_count);
+        cartCount = pref.getPrefInteger(this, pref.cart_count);
         updateCartBadge(cartCount);
+
+        // Refresh address display
+        updateAddressUI();
     }
 
     @Override
@@ -342,10 +363,8 @@ public class ContainerActivity extends Utility {
             try {
                 unregisterReceiver(cartBadgeUpdateReceiver);
             } catch (IllegalArgumentException e) {
-                // Receiver was not registered
                 e.printStackTrace();
             }
         }
     }
-
 }

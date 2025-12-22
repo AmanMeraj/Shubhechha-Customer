@@ -29,8 +29,7 @@
                 android:layout_height="45dp"
                 android:background="@drawable/black_circle"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <!-- Dollar Icon -->
             <ImageView
@@ -67,9 +66,11 @@
                 android:textSize="12sp"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="2dp"
+                android:maxLines="2"
+                android:ellipsize="end"
                 app:layout_constraintStart_toEndOf="@+id/icon_background"
                 app:layout_constraintTop_toBottomOf="@+id/tv_title"
-                app:layout_constraintEnd_toStartOf="@+id/tv_amount"/>
+                app:layout_constraintEnd_toStartOf="@+id/tv_date"/>
 
             <!-- Amount -->
             <TextView
@@ -80,8 +81,10 @@
                 android:textColor="#FF6B35"
                 android:fontFamily="@font/inter_bold"
                 android:textSize="16sp"
+                android:layout_marginStart="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/icon_background"/>
+                app:layout_constraintTop_toTopOf="@+id/tv_title"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_title"/>
 
             <!-- Date -->
             <TextView
@@ -92,6 +95,7 @@
                 android:textColor="#999999"
                 android:textSize="11sp"
                 android:layout_marginTop="2dp"
+                android:layout_marginStart="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_amount"/>
 

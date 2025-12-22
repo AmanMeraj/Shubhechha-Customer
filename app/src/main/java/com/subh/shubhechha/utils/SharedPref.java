@@ -20,7 +20,9 @@ public class SharedPref {
     final public String admin_mobile = "admin_mobile";
     final public String user_dob = "user_dob";
     final public String user_address = "user_address";
+    final public String user_short_address = "user_short_address";
     final public String user_image = "user_image";
+    final public String user_postal_code = "user_postal_code";
     final public String user_gender = "gender";
     final public String user_country = "country";
     final public String user_state = "state";

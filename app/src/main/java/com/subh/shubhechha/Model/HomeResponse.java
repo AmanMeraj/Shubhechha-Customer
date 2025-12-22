@@ -152,6 +152,38 @@ public class HomeResponse {
     }
 
     public class FooterBanners{
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public void setImage(String image) {
+            this.image = image;
+        }
+
+        public Object getModule_service() {
+            return module_service;
+        }
+
+        public void setModule_service(Object module_service) {
+            this.module_service = module_service;
+        }
+
+        public String getImage_path() {
+            return image_path;
+        }
+
+        public void setImage_path(String image_path) {
+            this.image_path = image_path;
+        }
+
         public int id;
         public String image;
         public Object module_service;
