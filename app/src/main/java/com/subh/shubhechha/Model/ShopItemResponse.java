@@ -34,6 +34,7 @@ public class ShopItemResponse {
     public Data data;
 
     public static class Data {
+        public Shop shop;
         public ArrayList<Menu> getMenus() {
             return menus;
         }
@@ -461,5 +462,35 @@ public class ShopItemResponse {
         public String url;
         public String label;
         public boolean active;
+    }
+
+    public class Shop{
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getMin_cart_val() {
+            return min_cart_val;
+        }
+
+        public void setMin_cart_val(String min_cart_val) {
+            this.min_cart_val = min_cart_val;
+        }
+
+        public int id;
+        public String name;
+        public String min_cart_val;
     }
 }

@@ -7,6 +7,7 @@ import com.subh.shubhechha.Model.GenericPostResponse;
 import com.subh.shubhechha.Model.GetAddressResponse;
 import com.subh.shubhechha.Model.HomeResponse;
 import com.subh.shubhechha.Model.LoginResponse;
+import com.subh.shubhechha.Model.NotificationResponse;
 import com.subh.shubhechha.Model.OrderDetails;
 import com.subh.shubhechha.Model.OrderModel;
 import com.subh.shubhechha.Model.PostAddress;
@@ -18,6 +19,7 @@ import com.subh.shubhechha.Model.ShopResponse;
 import com.subh.shubhechha.Model.UpdateFcm;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
+import com.subh.shubhechha.Model.WalletResponse;
 
 import java.util.List;
 
@@ -181,6 +183,12 @@ public interface ApiRequest {
     Call<HomeResponse> home(
             @Header("Authorization") String authorization
     );
+
+    @Headers({"Accept: application/json"})
+    @GET("notifications")
+    Call<NotificationResponse> getNotification(
+            @Header("Authorization") String authorization
+    );
     @Headers({"Accept: application/json"})
     @GET("shops")
     Call<ShopResponse> shops(
@@ -198,7 +206,7 @@ public interface ApiRequest {
             @Query("latitude") String latitude,
             @Query("shop_id") String shopId,
             @Query("menu_id") String menuId,
-            @Query("filter_by[]") List<String> filterBy,
+            @Query("filter_by") String filterBy,
             @Query("sort_by") String sortBy
     );
 
@@ -219,6 +227,12 @@ public interface ApiRequest {
     @Headers({"Accept: application/json"})
     @GET("cart")
     Call<CartResponse> getCart(
+            @Header("Authorization") String authorization
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("wallet")
+    Call<WalletResponse> getWallet(
             @Header("Authorization") String authorization
     );
 

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.subh.shubhechha.Model.Shop;
 import com.subh.shubhechha.databinding.ItemCategoryGridBinding;
+import com.subh.shubhechha.utils.TimeUtil;
 
 import java.util.List;
 
@@ -16,6 +17,8 @@ public class ShopsAdapter extends RecyclerView.Adapter<ShopsAdapter.ViewHolder> 
 
     private final List<Shop> shopsList;
     private OnShopClickListener listener;
+    TimeUtil timeUtil = new TimeUtil();
+
 
     // Constructor
     public ShopsAdapter(List<Shop> shopsList) {
@@ -64,8 +67,8 @@ public class ShopsAdapter extends RecyclerView.Adapter<ShopsAdapter.ViewHolder> 
 
         public void bind(Shop shop, int position) {
             binding.shopName.setText(shop.getName());
-            binding.shopTime.setText(shop.getTime());
-            binding.shopDistance.setText(shop.getDistance());
+            binding.orderTime.setText(shop.getTime());
+            binding.shopOpenDuration.setText(shop.getDistance());
             binding.shopImage.setImageResource(shop.getImageResId());
 
             binding.getRoot().setOnClickListener(v -> {

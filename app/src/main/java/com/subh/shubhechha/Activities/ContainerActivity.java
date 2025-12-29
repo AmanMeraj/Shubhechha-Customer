@@ -30,6 +30,7 @@ import com.subh.shubhechha.Fragments.ProfileFragment;
 import com.subh.shubhechha.Fragments.WalletFragment;
 import com.subh.shubhechha.R;
 import com.subh.shubhechha.databinding.ActivityContainerBinding;
+import com.subh.shubhechha.utils.AuthHelper;
 import com.subh.shubhechha.utils.Utility;
 
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class ContainerActivity extends Utility {
     private Fragment activeFragment = null;
     private BroadcastReceiver cartBadgeUpdateReceiver;
     int cartCount = 0;
+
+    // Auth helper
+    private AuthHelper authHelper;
 
     // Permission request launcher
     private ActivityResultLauncher<String[]> permissionLauncher;
@@ -60,6 +64,9 @@ public class ContainerActivity extends Utility {
             return insets;
         });
 
+        // Initialize auth helper
+        authHelper = new AuthHelper();
+
         // Initialize permission launcher
         initializePermissionLauncher();
         setupCartBadgeReceiver();
@@ -70,33 +77,8 @@ public class ContainerActivity extends Utility {
         // Initialize address from SharedPreferences
         updateAddressUI();
 
-        binding.notification.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                binding.notification.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(ContainerActivity.this, NotificationActivity.class);
-                        startActivity(intent);
-                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    }
-                }, 300);
-            }
-        });
-
-        binding.cart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                binding.cart.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(ContainerActivity.this, CartActivity.class);
-                        startActivity(intent);
-                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    }
-                }, 300);
-            }
-        });
+        // Setup click listeners with login checks
+        setupClickListeners();
 
         // Set default tab and fragment on first launch
         if (savedInstanceState == null) {
@@ -107,23 +89,74 @@ public class ContainerActivity extends Utility {
         }
 
         // Handle tab selection events
+        setupBottomNavigation();
+
+        updateCartBadge(cartCount);
+    }
+
+    private void setupBottomNavigation() {
         if (binding.bottomNavigation != null) {
             binding.bottomNavigation.setOnTabSelectedListener(position -> {
                 switch (position) {
                     case 0:
+                        // Home - accessible without login
                         loadFragment(new HomeFragment());
                         break;
                     case 1:
-                        loadFragment(new WalletFragment());
+                        // Wallet - requires login
+                        if (authHelper.isUserLoggedIn(this)) {
+                            loadFragment(new WalletFragment());
+                        } else {
+                            // Show dialog instead of navigating to login
+                            authHelper.showLoginRequiredDialog(this, null);
+                            // Stay on current tab (home)
+                            binding.bottomNavigation.selectTab(0);
+                        }
                         break;
                     case 2:
-                        loadFragment(new ProfileFragment());
+                        // Profile - requires login
+                        if (authHelper.isUserLoggedIn(this)) {
+                            loadFragment(new ProfileFragment());
+                        } else {
+                            // Show dialog instead of navigating to login
+                            authHelper.showLoginRequiredDialog(this, null);
+                            // Stay on current tab (home)
+                            binding.bottomNavigation.selectTab(0);
+                        }
                         break;
                 }
             });
         }
+    }
 
-        updateCartBadge(cartCount);
+    private void setupClickListeners() {
+        // Notification - requires login
+        binding.notification.setOnClickListener(v -> {
+            binding.notification.postDelayed(() -> {
+                if (authHelper.isUserLoggedIn(this)) {
+                    Intent intent = new Intent(ContainerActivity.this, NotificationActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                } else {
+                    // Show dialog instead of directly navigating to login
+                    authHelper.showLoginRequiredDialog(this, null);
+                }
+            }, 300);
+        });
+
+        // Cart - requires login
+        binding.cart.setOnClickListener(v -> {
+            binding.cart.postDelayed(() -> {
+                if (authHelper.isUserLoggedIn(this)) {
+                    Intent intent = new Intent(ContainerActivity.this, CartActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                } else {
+                    // Show dialog instead of directly navigating to login
+                    authHelper.showLoginRequiredDialog(this, null);
+                }
+            }, 300);
+        });
     }
 
     private void setupCartBadgeReceiver() {
@@ -161,26 +194,15 @@ public class ContainerActivity extends Utility {
         }
     }
 
-    /**
-     * Update address display in the UI
-     * Call this method when address changes
-     */
     public void updateAddress(String address) {
-        // Save to preferences
         pref.setPrefString(this, pref.user_short_address, address);
-
-        // Update UI
         updateAddressUI();
 
-        // Optional: Send broadcast to notify other components
         Intent intent = new Intent("UPDATE_ADDRESS");
         intent.putExtra("address", address);
         sendBroadcast(intent);
     }
 
-    /**
-     * Update the address TextView in the UI
-     */
     private void updateAddressUI() {
         if (binding.address != null) {
             String shortAddress = pref.getPrefString(this, pref.user_address);
@@ -192,9 +214,6 @@ public class ContainerActivity extends Utility {
         }
     }
 
-    /**
-     * Initialize the permission launcher
-     */
     private void initializePermissionLauncher() {
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
@@ -225,19 +244,14 @@ public class ContainerActivity extends Utility {
         );
     }
 
-    /**
-     * Request all necessary permissions
-     */
     private void requestAllPermissions() {
         List<String> permissionsToRequest = new ArrayList<>();
 
-        // Camera permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.CAMERA);
         }
 
-        // Location permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -248,7 +262,6 @@ public class ContainerActivity extends Utility {
             permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         }
 
-        // Notification permission (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -256,7 +269,6 @@ public class ContainerActivity extends Utility {
             }
         }
 
-        // Storage permissions (varies by Android version)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -284,9 +296,6 @@ public class ContainerActivity extends Utility {
         }
     }
 
-    /**
-     * Show dialog explaining why permissions are needed
-     */
     private void showPermissionRationaleDialog(List<String> deniedPermissions) {
         new AlertDialog.Builder(this)
                 .setTitle("Permissions Required")
@@ -307,9 +316,6 @@ public class ContainerActivity extends Utility {
                 .show();
     }
 
-    /**
-     * Show dialog to navigate to app settings
-     */
     private void showPermissionSettingsDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Permissions Required")
@@ -347,18 +353,14 @@ public class ContainerActivity extends Utility {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh cart badge from SharedPreferences
         cartCount = pref.getPrefInteger(this, pref.cart_count);
         updateCartBadge(cartCount);
-
-        // Refresh address display
         updateAddressUI();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Unregister the broadcast receiver
         if (cartBadgeUpdateReceiver != null) {
             try {
                 unregisterReceiver(cartBadgeUpdateReceiver);

@@ -69,10 +69,8 @@ public class ShopsActivity extends AppCompatActivity {
             return;
         }
 
-        if (!loadUserData()) {
-            showErrorAndFinish("Please login to continue");
-            return;
-        }
+        // Load user data - doesn't require login, just gets available data
+        loadUserData();
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -102,18 +100,23 @@ public class ShopsActivity extends AppCompatActivity {
         return categoryName != null && !categoryName.isEmpty();
     }
 
-    private boolean loadUserData() {
+    private void loadUserData() {
         try {
-            authToken = "Bearer " + pref.getPrefString(this, pref.user_token);
-            latitude = pref.getPrefString(this, pref.user_lat);
-            longitude = pref.getPrefString(this, pref.user_long);
-            Log.d(TAG, "Location: " + latitude + ", " + longitude);
-
-            if (authToken == null || authToken.isEmpty() || authToken.equals("Bearer ")) {
-                Log.e(TAG, "Auth token is missing");
-                return false;
+            // Get token - use empty Bearer for guest users
+            String token = pref.getPrefString(this, pref.user_token);
+            if (token != null && !token.isEmpty()) {
+                authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
+                Log.d(TAG, "Loading as logged-in user");
+            } else {
+                authToken = "Bearer "; // Empty bearer for guest access
+                Log.d(TAG, "Loading as guest user");
             }
 
+            // Get location
+            latitude = pref.getPrefString(this, pref.user_lat);
+            longitude = pref.getPrefString(this, pref.user_long);
+
+            // Use default values if location not available
             if (latitude == null || latitude.isEmpty()) {
                 latitude = "0.0";
                 Log.w(TAG, "Latitude not available, using default");
@@ -123,10 +126,14 @@ public class ShopsActivity extends AppCompatActivity {
                 Log.w(TAG, "Longitude not available, using default");
             }
 
-            return true;
+            Log.d(TAG, "Location: " + latitude + ", " + longitude);
+
         } catch (Exception e) {
             Log.e(TAG, "Error loading user data: " + e.getMessage());
-            return false;
+            // Set defaults on error
+            authToken = "Bearer ";
+            latitude = "0.0";
+            longitude = "0.0";
         }
     }
 
@@ -244,15 +251,12 @@ public class ShopsActivity extends AppCompatActivity {
                 if (percentage > 0.6f) {
                     float alpha = (percentage - 0.6f) * 2.5f;
                     binding.tvToolbarTitle.setAlpha(Math.min(alpha, 1.0f));
-                    binding.searchBtnToolBar.setAlpha(Math.min(alpha, 1.0f));
                 } else {
                     binding.tvToolbarTitle.setAlpha(0f);
-                    binding.searchBtnToolBar.setAlpha(0f);
                 }
 
                 // Handle expanded header visibility
                 binding.tvNotificationExpanded.setAlpha(1 - percentage);
-                binding.searchBtn.setAlpha(1 - percentage);
 
                 if (scrollRange + verticalOffset == 0) {
                     binding.tvToolbarTitle.setVisibility(View.VISIBLE);

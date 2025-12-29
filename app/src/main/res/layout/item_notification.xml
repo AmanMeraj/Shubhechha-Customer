@@ -47,15 +47,14 @@
                 android:id="@+id/tv_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Lorem Ipsum"
                 android:textColor="@color/black"
                 android:fontFamily="@font/inter_bold"
                 android:textSize="15sp"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="-30dp"
+                android:layout_marginEnd="20dp"
                 app:layout_constraintStart_toEndOf="@+id/icon_background"
                 app:layout_constraintTop_toTopOf="@+id/icon_background"
-                app:layout_constraintEnd_toStartOf="@+id/tv_date"/>
+                app:layout_constraintEnd_toEndOf="parent"/>
 
             <!-- Subtitle -->
             <TextView

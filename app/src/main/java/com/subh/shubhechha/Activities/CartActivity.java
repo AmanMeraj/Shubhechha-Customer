@@ -52,7 +52,7 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
 
             initializeViewModel();
             initializeViews();
-            setupCollapsingToolbar();
+//            setupCollapsingToolbar();
             setupRecyclerView();
             setupClickListeners();
             loadCartData();
@@ -82,51 +82,51 @@ public class CartActivity extends Utility implements CartAdapter.OnCartItemListe
         }
     }
 
-    private void setupCollapsingToolbar() {
-        try {
-            binding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-                boolean isCollapsed = false;
-
-                @Override
-                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    int scrollRange = appBarLayout.getTotalScrollRange();
-                    if (scrollRange == 0) return;
-
-                    float percentage = Math.abs(verticalOffset / (float) scrollRange);
-                    if (Float.isNaN(percentage) || Float.isInfinite(percentage)) return;
-
-                    if (binding.tvToolbarTitle != null) {
-                        binding.tvToolbarTitle.setAlpha(percentage);
-                    }
-
-                    if (binding.tvOrderDetails != null) {
-                        binding.tvOrderDetails.setAlpha(1 - percentage);
-                    }
-
-                    if (binding.peachCurveBg != null) {
-                        float scale = 1 - (percentage * 0.2f);
-                        scale = Math.max(0.8f, Math.min(1f, scale));
-                        binding.peachCurveBg.setScaleY(scale);
-                    }
-
-                    if (Math.abs(verticalOffset) >= scrollRange) {
-                        if (!isCollapsed) {
-                            isCollapsed = true;
-                            onToolbarCollapsed();
-                        }
-                    } else {
-                        if (isCollapsed) {
-                            isCollapsed = false;
-                            onToolbarExpanded();
-                        }
-                    }
-                }
-            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void setupCollapsingToolbar() {
+//        try {
+//            binding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+//                boolean isCollapsed = false;
+//
+//                @Override
+//                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+//                    int scrollRange = appBarLayout.getTotalScrollRange();
+//                    if (scrollRange == 0) return;
+//
+//                    float percentage = Math.abs(verticalOffset / (float) scrollRange);
+//                    if (Float.isNaN(percentage) || Float.isInfinite(percentage)) return;
+//
+//                    if (binding.tvToolbarTitle != null) {
+//                        binding.tvToolbarTitle.setAlpha(percentage);
+//                    }
+//
+//                    if (binding.tvOrderDetails != null) {
+//                        binding.tvOrderDetails.setAlpha(1 - percentage);
+//                    }
+//
+//                    if (binding.peachCurveBg != null) {
+//                        float scale = 1 - (percentage * 0.2f);
+//                        scale = Math.max(0.8f, Math.min(1f, scale));
+//                        binding.peachCurveBg.setScaleY(scale);
+//                    }
+//
+//                    if (Math.abs(verticalOffset) >= scrollRange) {
+//                        if (!isCollapsed) {
+//                            isCollapsed = true;
+//                            onToolbarCollapsed();
+//                        }
+//                    } else {
+//                        if (isCollapsed) {
+//                            isCollapsed = false;
+//                            onToolbarExpanded();
+//                        }
+//                    }
+//                }
+//            });
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void onToolbarCollapsed() {
         // Called when toolbar is fully collapsed

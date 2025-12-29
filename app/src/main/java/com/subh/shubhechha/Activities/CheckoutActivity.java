@@ -126,6 +126,8 @@ public class CheckoutActivity extends Utility {
                         } else {
                             showAddressCard(false);
                         }
+                        // Store wallet amount
+                        walletAmount = data.getWallet_amount();
 
                         // Load payment methods
                         if (data.getPayment_methods() != null && !data.getPayment_methods().isEmpty()) {
@@ -133,8 +135,7 @@ public class CheckoutActivity extends Utility {
                             populatePaymentMethods(paymentMethods);
                         }
 
-                        // Store wallet amount
-                        walletAmount = data.getWallet_amount();
+
                     }
                 } else {
                     String message = response.data.getMessage() != null ?
@@ -756,18 +757,44 @@ public class CheckoutActivity extends Utility {
                 }
             }
         } else {
-            // No wallet involved, proceed directly
-            proceedWithOrder();
+            // No wallet involved, proceed with single payment method
+            showSinglePaymentConfirmation();
         }
     }
 
     private void showWalletFullPaymentConfirmation() {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Confirm Payment")
-                .setMessage("Order Amount: ₹" + total +
-                        "\nWallet Balance: ₹" + walletAmount +
-                        "\n\nFull amount will be deducted from your wallet." +
-                        "\n\nDo you want to proceed?")
+                .setMessage("Total Order Amount: ₹" + total +
+                        "\n\nPayment Breakdown:" +
+                        "\n• Wallet Payment: ₹" + walletAmount +
+                        "\n• Amount to Pay: ₹0" +
+                        "\n\nFull amount will be deducted from your wallet.")
+                .setPositiveButton("Proceed", (dialog, which) -> {
+                    proceedWithOrder();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .setCancelable(true)
+                .show();
+    }
+
+    private void showSinglePaymentConfirmation() {
+        String paymentMethodName;
+        if (selectedPaymentSlugs.contains(COD)) {
+            paymentMethodName = "Cash on Delivery";
+        } else if (selectedPaymentSlugs.contains(UPI)) {
+            paymentMethodName = "UPI";
+        } else {
+            paymentMethodName = "Selected Payment Method";
+        }
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Confirm Payment")
+                .setMessage("Total Order Amount: ₹" + total +
+                        "\n\nPayment Method: " + paymentMethodName +
+                        "\n\nAmount to Pay: ₹" + total)
                 .setPositiveButton("Proceed", (dialog, which) -> {
                     proceedWithOrder();
                 })
@@ -800,15 +827,15 @@ public class CheckoutActivity extends Utility {
     }
 
     private void showPartialWalletPaymentDialog(int remainingAmount) {
-        String paymentMethodName = selectedPaymentSlugs.contains(COD) ? "COD" : "UPI";
+        String paymentMethodName = selectedPaymentSlugs.contains(COD) ? "Cash on Delivery" : "UPI";
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Partial Payment Confirmation")
-                .setMessage("Order Amount: ₹" + total +
-                        "\nWallet Balance: ₹" + walletAmount +
-                        "\n\n• ₹" + walletAmount + " will be deducted from wallet" +
-                        "\n• ₹" + remainingAmount + " will be paid via " + paymentMethodName +
-                        "\n\nDo you want to proceed?")
+                .setMessage("Total Order Amount: ₹" + total +
+                        "\n\nPayment Breakdown:" +
+                        "\n• Wallet Payment: ₹" + walletAmount +
+                        "\n• " + paymentMethodName + ": ₹" + remainingAmount +
+                        "\n\nAmount to Pay via " + paymentMethodName + ": ₹" + remainingAmount)
                 .setPositiveButton("Proceed", (dialog, which) -> {
                     proceedWithOrder();
                 })
@@ -822,8 +849,8 @@ public class CheckoutActivity extends Utility {
     private void showInsufficientWalletDialog(int remainingAmount) {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Insufficient Wallet Balance")
-                .setMessage("Order Amount: ₹" + total +
-                        "\nWallet Balance: ₹" + walletAmount +
+                .setMessage("Total Order Amount: ₹" + total +
+                        "\n\nWallet Balance: ₹" + walletAmount +
                         "\nShortfall: ₹" + remainingAmount +
                         "\n\nPlease select COD or UPI along with Wallet to complete this order.")
                 .setPositiveButton("OK", (dialog, which) -> {
@@ -832,4 +859,5 @@ public class CheckoutActivity extends Utility {
                 .setCancelable(true)
                 .show();
     }
+
 }

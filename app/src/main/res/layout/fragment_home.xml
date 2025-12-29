@@ -43,7 +43,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="16dp"
-                    android:text="Hii! Aman"
                     android:textSize="15sp"
                     android:fontFamily="@font/inter_semibold"
                     android:textColor="@android:color/black" />

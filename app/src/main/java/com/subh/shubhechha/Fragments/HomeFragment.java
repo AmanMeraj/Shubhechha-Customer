@@ -425,14 +425,15 @@ public class HomeFragment extends Fragment {
         showLoading(true);
         String token = pref.getPrefString(requireActivity(), pref.user_token);
 
-        if (token.isEmpty()) {
-            Log.e(TAG, "Auth token not found");
-            showLoading(false);
-            Toast.makeText(getContext(), "Please login again", Toast.LENGTH_SHORT).show();
-            return;
+        // Create auth header - use empty Bearer if not logged in
+        String authHeader;
+        if (token == null || token.isEmpty()) {
+            authHeader = "Bearer "; // Empty bearer for guest access
+            Log.d(TAG, "Loading data as guest user");
+        } else {
+            authHeader = token.startsWith("Bearer ") ? token : "Bearer " + token;
+            Log.d(TAG, "Loading data as logged-in user");
         }
-
-        String authHeader = token.startsWith("Bearer ") ? token : "Bearer " + token;
 
         viewModel.home(authHeader).observe(getViewLifecycleOwner(), response -> {
             showLoading(false);
@@ -444,7 +445,6 @@ public class HomeFragment extends Fragment {
                     String errorMsg = response.message != null ?
                             response.message : "Failed to load data";
                     Log.e(TAG, "API Error: " + errorMsg);
-                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Log.e(TAG, "Response is null");

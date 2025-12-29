@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.subh.shubhechha.Activities.AddressBookActivity;
 import com.subh.shubhechha.Activities.ContainerActivity;
+import com.subh.shubhechha.Activities.IntroductionActivity;
 import com.subh.shubhechha.Activities.LoginActivity;
 import com.subh.shubhechha.Activities.MyOrdersActivity;
 import com.subh.shubhechha.Activities.MyProfileActivity;
@@ -378,24 +379,7 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    /**
-     * Perform logout operation
-     */
-    private void performLogout() {
-        if (!isAdded() || getContext() == null) return;
 
-        // Clear all user data from SharedPreferences
-        pref.setPrefBoolean(requireContext(), pref.login_status, false);
-        pref.setPrefString(requireContext(), pref.user_token, "");
-        pref.setPrefString(requireContext(), pref.user_name, "");
-        pref.setPrefString(requireContext(), pref.user_mobile, "");
-        pref.setPrefString(requireContext(), pref.user_email, "");
-        pref.setPrefString(requireContext(), pref.user_type, "");
-        pref.setPrefInteger(requireContext(), pref.cart_item, 0);
-
-        // Redirect to login
-        redirectToLogin();
-    }
 
     /**
      * Redirect to login activity
@@ -440,5 +424,47 @@ public class ProfileFragment extends Fragment {
 
         // Nullify binding to prevent memory leaks
         binding = null;
+    }
+    /**
+     * Perform logout operation
+     */
+
+    private void performLogout() {
+        if (!isAdded() || getContext() == null) return;
+
+        // Clear all user data from SharedPreferences
+        pref.setPrefBoolean(requireContext(), pref.login_status, false);
+        pref.setPrefString(requireContext(), pref.user_token, "");
+        pref.setPrefString(requireContext(), pref.user_name, "");
+        pref.setPrefString(requireContext(), pref.user_mobile, "");
+        pref.setPrefString(requireContext(), pref.user_email, "");
+        pref.setPrefString(requireContext(), pref.user_type, "");
+        pref.setPrefInteger(requireContext(), pref.cart_item, 0);
+        pref.setPrefInteger(requireContext(), pref.cart_count, 0);
+
+        // Reset intro flag to show intro screen again
+        pref.setPrefBoolean(requireContext(), pref.is_intro_shown, false);
+
+        // Redirect to intro activity
+        redirectToIntro();
+    }
+
+    /**
+     * Redirect to intro activity after logout
+     */
+    private void redirectToIntro() {
+        if (!isAdded() || getContext() == null) return;
+
+        try {
+            Intent intent = new Intent(requireContext(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            if (getActivity() != null) {
+                getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                getActivity().finish();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

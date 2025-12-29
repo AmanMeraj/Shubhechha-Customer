@@ -16,6 +16,7 @@ import com.subh.shubhechha.Model.GenericPostResponse;
 import com.subh.shubhechha.Model.GetAddressResponse;
 import com.subh.shubhechha.Model.HomeResponse;
 import com.subh.shubhechha.Model.LoginResponse;
+import com.subh.shubhechha.Model.NotificationResponse;
 import com.subh.shubhechha.Model.OrderDetails;
 import com.subh.shubhechha.Model.OrderModel;
 import com.subh.shubhechha.Model.PostAddress;
@@ -90,6 +91,11 @@ public class Repository {
         Call<HomeResponse> call = apiRequest.home(auth);
         return performRequest(call);
     }
+
+    public LiveData<ApiResponse<NotificationResponse>> getNotification(String auth) {
+        Call<NotificationResponse> call = apiRequest.getNotification(auth);
+        return performRequest(call);
+    }
     public LiveData<ApiResponse<ShopResponse>> shops(String auth, String longitude, String latitude, int moduleId) {
         Call<ShopResponse> call = apiRequest.shops(auth,longitude,latitude,moduleId);
         return performRequest(call);
@@ -108,7 +114,7 @@ public class Repository {
         return performRequest(call);
     }
 
-    public LiveData<ApiResponse<ShopItemResponse>> getShopItems(String auth, String longitude, String latitude, String shopId, String menuId, List<String> filterBy, String sortBy) {
+    public LiveData<ApiResponse<ShopItemResponse>> getShopItems(String auth, String longitude, String latitude, String shopId, String menuId, String filterBy, String sortBy) {
         Call<ShopItemResponse> call = apiRequest.getShopItems(auth, longitude, latitude, shopId, menuId, filterBy, sortBy
         );
         return performRequest(call);

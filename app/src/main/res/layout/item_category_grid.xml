@@ -91,7 +91,7 @@
             app:tint="#4CAF50" />
 
         <TextView
-            android:id="@+id/shopTime"
+            android:id="@+id/orderTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="30 min"
@@ -101,7 +101,7 @@
             android:layout_marginStart="4dp"/>
 
         <TextView
-            android:id="@+id/shopDistance"
+            android:id="@+id/shopOpenDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="09:00 AM - 08:00 PM"

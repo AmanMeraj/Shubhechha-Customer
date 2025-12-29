@@ -5,25 +5,32 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.subh.shubhechha.Adapters.NotificationAdapter;
-import com.subh.shubhechha.Model.NotificationModel;
-import com.subh.shubhechha.R;
+import com.subh.shubhechha.Model.NotificationResponse;
+import com.subh.shubhechha.Repository.Repository;
+import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.ActivityNotificationBinding;
 import com.subh.shubhechha.utils.Utility;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class NotificationActivity extends Utility {
 
     private ActivityNotificationBinding binding;
     private NotificationAdapter notificationAdapter;
+    private ViewModel viewModel;
+
+    private int currentPage = 1;
+    private int lastPage = 1;
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +47,20 @@ public class NotificationActivity extends Utility {
                 return insets;
             });
 
+            initializeViewModel();
             initializeViews();
             setupCollapsingToolbar();
             setupRecyclerView();
-            loadNotifications();
+            loadNotifications(currentPage);
 
         } catch (Exception e) {
             e.printStackTrace();
             showError("Failed to initialize notifications");
         }
+    }
+
+    private void initializeViewModel() {
+        viewModel = new ViewModelProvider(this).get(ViewModel.class);
     }
 
     private void initializeViews() {
@@ -115,20 +127,49 @@ public class NotificationActivity extends Utility {
 
     private void onToolbarCollapsed() {
         // Called when toolbar is fully collapsed
-        // Add any additional animations or state changes here
     }
 
     private void onToolbarExpanded() {
         // Called when toolbar is fully expanded
-        // Add any additional animations or state changes here
     }
 
     private void setupRecyclerView() {
         try {
+            // Initialize adapter
+            notificationAdapter = new NotificationAdapter();
+
             // Setup RecyclerView
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
             binding.rcNotification.setLayoutManager(layoutManager);
             binding.rcNotification.setHasFixedSize(true);
+            binding.rcNotification.setAdapter(notificationAdapter);
+
+            // Add padding to prevent first item from being hidden
+            binding.rcNotification.setClipToPadding(false);
+            int topPadding = (int) (16 * getResources().getDisplayMetrics().density); // 16dp
+            binding.rcNotification.setPadding(0, topPadding, 0, 0);
+
+            // Add scroll listener for pagination
+            binding.rcNotification.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+
+                    if (dy > 0) { // Scrolling down
+                        int visibleItemCount = layoutManager.getChildCount();
+                        int totalItemCount = layoutManager.getItemCount();
+                        int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                        if (!isLoading && !isLastPage) {
+                            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                                    && firstVisibleItemPosition >= 0) {
+                                // Load next page
+                                loadNotifications(currentPage + 1);
+                            }
+                        }
+                    }
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -136,77 +177,122 @@ public class NotificationActivity extends Utility {
         }
     }
 
-    private void loadNotifications() {
+    private void loadNotifications(int page) {
         try {
-            // Show loading state
-            showLoading(true);
+            if (isLoading || isLastPage) return;
 
-            // Sample data - Replace with your actual data source
-            List<NotificationModel> notifications = getSampleNotifications();
+            isLoading = true;
+            showLoading(page == 1); // Show main loading only for first page
 
-            // Initialize adapter with data
-            notificationAdapter = new NotificationAdapter(notifications);
-            binding.rcNotification.setAdapter(notificationAdapter);
+            String token = "Bearer "+getToken();
+            if (token == null || token.isEmpty()) {
+                showError("Authentication required");
+                showLoading(false);
+                isLoading = false;
+                return;
+            }
 
-            // Update empty state
-            updateEmptyState(notifications.isEmpty());
+            viewModel.getNotification(token).observe(this, apiResponse -> {
+                isLoading = false;
+                showLoading(false);
 
-            // Hide loading
-            showLoading(false);
+                if (apiResponse != null && apiResponse.isSuccess()) {
+                    handleSuccessResponse(apiResponse.data, page);
+                } else {
+                    handleErrorResponse(apiResponse);
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
             showError("Failed to load notifications");
             showLoading(false);
+            isLoading = false;
         }
     }
 
-    private List<NotificationModel> getSampleNotifications() {
-        List<NotificationModel> notifications = new ArrayList<>();
+    private void handleSuccessResponse(NotificationResponse response, int page) {
+        try {
+            if (response != null && response.getData() != null) {
+                NotificationResponse.Data data = response.getData();
+                if (data.getNotifications() != null) {
+                    NotificationResponse.Notifications notifications = data.getNotifications();
 
-        notifications.add(new NotificationModel(
-                "Order Confirmed",
-                "Your order #12345 has been confirmed",
-                "2 hours ago",
-                R.drawable.subh_logo2
-        ));
+                    // Update pagination info
+                    currentPage = notifications.getCurrent_page();
+                    lastPage = notifications.getLast_page();
+                    isLastPage = currentPage >= lastPage;
 
-        notifications.add(new NotificationModel(
-                "Out for Delivery",
-                "Your order is out for delivery",
-                "5 hours ago",
-                R.drawable.subh_logo2
-        ));
+                    // Get notification items
+                    if (notifications.getData() != null && !notifications.getData().isEmpty()) {
+                        android.util.Log.d("NotificationActivity", "Total items: " + notifications.getData().size());
+                        android.util.Log.d("NotificationActivity", "First item title: " +
+                                (notifications.getData().get(0) != null ? notifications.getData().get(0).getTitle() : "null"));
 
-        notifications.add(new NotificationModel(
-                "Special Offer",
-                "Get 20% off on your next order",
-                "1 day ago",
-                R.drawable.subh_logo2
-        ));
+                        if (page == 1) {
+                            // First page - replace all data
+                            notificationAdapter.clearNotifications();
+                            notificationAdapter.addNotifications(notifications.getData());
+                        } else {
+                            // Next pages - append data
+                            notificationAdapter.addNotifications(notifications.getData());
+                        }
 
-        notifications.add(new NotificationModel(
-                "Payment Successful",
-                "Payment of ₹850 received successfully",
-                "2 days ago",
-                R.drawable.subh_logo2
-        ));
+                        updateEmptyState(false);
 
-        notifications.add(new NotificationModel(
-                "New Products Added",
-                "Check out our new collection",
-                "3 days ago",
-                R.drawable.subh_logo2
-        ));
+                        // Force RecyclerView to update
+                        binding.rcNotification.post(() -> {
+                            if (page == 1 && binding.rcNotification.getLayoutManager() != null) {
+                                binding.rcNotification.scrollToPosition(0);
+                            }
+                        });
+                    } else {
+                        if (page == 1) {
+                            // No notifications at all
+                            updateEmptyState(true);
+                        }
+                    }
+                } else {
+                    if (page == 1) {
+                        updateEmptyState(true);
+                    }
+                }
+            } else {
+                if (page == 1) {
+                    updateEmptyState(true);
+                }
+            }
 
-        notifications.add(new NotificationModel(
-                "Order Delivered",
-                "Your order #12344 has been delivered",
-                "5 days ago",
-                R.drawable.subh_logo2
-        ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            android.util.Log.e("NotificationActivity", "Error processing notifications", e);
+            showError("Error processing notifications");
+        }
+    }
 
-        return notifications;
+    private void handleErrorResponse(Repository.ApiResponse<NotificationResponse> apiResponse) {
+        try {
+            if (apiResponse != null) {
+                if (apiResponse.code == Repository.ERROR_SESSION_EXPIRED) {
+                    showError("Session expired. Please login again.");
+                    // Handle session expiration (e.g., navigate to login)
+//                    handleSessionExpired();
+                } else if (apiResponse.message != null && !apiResponse.message.isEmpty()) {
+                    showError(apiResponse.message);
+                } else {
+                    showError("Failed to load notifications");
+                }
+            } else {
+                showError("Failed to load notifications");
+            }
+
+            if (currentPage == 1) {
+                updateEmptyState(true);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateEmptyState(boolean isEmpty) {
@@ -251,5 +337,8 @@ public class NotificationActivity extends Utility {
             binding = null;
         }
         notificationAdapter = null;
+    }
+    private  String getToken(){
+        return pref.getPrefString(this, pref.user_token);
     }
 }

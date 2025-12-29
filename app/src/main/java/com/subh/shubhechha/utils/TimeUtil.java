@@ -103,4 +103,26 @@ public class TimeUtil {
 
         return "N/A";
     }
+
+    public static String formatOnlyTime(String time) {
+        if (time == null || time.isEmpty()) {
+            return "N/A";
+        }
+
+        try {
+            SimpleDateFormat inputFormat =
+                    new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat outputFormat =
+                    new SimpleDateFormat("hh:mm a", Locale.getDefault());
+
+            Date date = inputFormat.parse(time);
+            if (date != null) {
+                return outputFormat.format(date);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return "N/A";
+    }
 }

@@ -551,17 +551,6 @@ public class MyProfileActivity extends Utility {
             isValid = false;
         }
 
-        // Validate Email
-        if (TextUtils.isEmpty(email)) {
-            binding.etEmail.setError("Email is required");
-            if (isValid) binding.etEmail.requestFocus();
-            isValid = false;
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.setError("Enter a valid email address");
-            if (isValid) binding.etEmail.requestFocus();
-            isValid = false;
-        }
-
         // Validate Phone
         if (TextUtils.isEmpty(phone)) {
             binding.etPhone.setError("Phone number is required");

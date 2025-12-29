@@ -53,7 +53,7 @@ public class AddressBookActivity extends Utility {
         initViewModel();
         initSharedPreferences();
         initViews();
-        setupCollapsingToolbar();
+//        setupCollapsingToolbar();
         setupRecyclerView();
         loadAddresses();
     }
@@ -68,7 +68,6 @@ public class AddressBookActivity extends Utility {
     }
 
     private void initViews() {
-        binding.tvNotificationExpanded.setText("Address Book");
         binding.tvToolbarTitle.setText("Address Book");
 
         binding.backBtn.setOnClickListener(v -> onBackPressed());
@@ -82,38 +81,38 @@ public class AddressBookActivity extends Utility {
         });
     }
 
-    private void setupCollapsingToolbar() {
-        binding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            boolean isShow = true;
-            int scrollRange = -1;
-
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (scrollRange == -1) {
-                    scrollRange = appBarLayout.getTotalScrollRange();
-                }
-
-                float percentage = Math.abs(verticalOffset) / (float) scrollRange;
-
-                if (percentage > 0.6f) {
-                    float alpha = (percentage - 0.6f) * 2.5f;
-                    binding.tvToolbarTitle.setAlpha(alpha);
-                } else {
-                    binding.tvToolbarTitle.setAlpha(0f);
-                }
-
-                binding.tvNotificationExpanded.setAlpha(1 - percentage);
-
-                if (scrollRange + verticalOffset == 0) {
-                    binding.tvToolbarTitle.setVisibility(View.VISIBLE);
-                    isShow = true;
-                } else if (isShow) {
-                    binding.tvToolbarTitle.setVisibility(View.VISIBLE);
-                    isShow = false;
-                }
-            }
-        });
-    }
+//    private void setupCollapsingToolbar() {
+//        binding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+//            boolean isShow = true;
+//            int scrollRange = -1;
+//
+//            @Override
+//            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+//                if (scrollRange == -1) {
+//                    scrollRange = appBarLayout.getTotalScrollRange();
+//                }
+//
+//                float percentage = Math.abs(verticalOffset) / (float) scrollRange;
+//
+//                if (percentage > 0.6f) {
+//                    float alpha = (percentage - 0.6f) * 2.5f;
+//                    binding.tvToolbarTitle.setAlpha(alpha);
+//                } else {
+//                    binding.tvToolbarTitle.setAlpha(0f);
+//                }
+//
+//                binding.tvNotificationExpanded.setAlpha(1 - percentage);
+//
+//                if (scrollRange + verticalOffset == 0) {
+//                    binding.tvToolbarTitle.setVisibility(View.VISIBLE);
+//                    isShow = true;
+//                } else if (isShow) {
+//                    binding.tvToolbarTitle.setVisibility(View.VISIBLE);
+//                    isShow = false;
+//                }
+//            }
+//        });
+//    }
 
     private void setupRecyclerView() {
         binding.rcAddressBook.setLayoutManager(new LinearLayoutManager(this));

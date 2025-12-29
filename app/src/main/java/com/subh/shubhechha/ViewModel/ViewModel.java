@@ -16,6 +16,7 @@ import com.subh.shubhechha.Model.GenericPostResponse;
 import com.subh.shubhechha.Model.GetAddressResponse;
 import com.subh.shubhechha.Model.HomeResponse;
 import com.subh.shubhechha.Model.LoginResponse;
+import com.subh.shubhechha.Model.NotificationResponse;
 import com.subh.shubhechha.Model.OrderDetails;
 import com.subh.shubhechha.Model.OrderModel;
 import com.subh.shubhechha.Model.PostAddress;
@@ -73,11 +74,15 @@ public class ViewModel extends AndroidViewModel {
     public LiveData<Repository.ApiResponse<HomeResponse>>home(String auth) {
         return repository.home(auth);
     }
+
+    public LiveData<Repository.ApiResponse<NotificationResponse>>getNotification(String auth) {
+        return repository.getNotification(auth);
+    }
     public LiveData<Repository.ApiResponse<ShopResponse>>shops(String auth, String longitude, String latitude, int moduleId) {
         return repository.shops(auth,longitude,latitude,moduleId);
     }
 
-    public LiveData<Repository.ApiResponse<ShopItemResponse>> getShopItems(String auth, String longitude, String latitude, String shopId, String menuId, List<String> filterBy, String sortBy) {
+    public LiveData<Repository.ApiResponse<ShopItemResponse>> getShopItems(String auth, String longitude, String latitude, String shopId, String menuId, String filterBy, String sortBy) {
         return repository.getShopItems(auth, longitude, latitude, shopId, menuId, filterBy, sortBy);
     }
 

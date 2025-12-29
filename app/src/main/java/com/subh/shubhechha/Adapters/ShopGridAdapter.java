@@ -10,6 +10,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.subh.shubhechha.Model.ShopResponse;
 import com.subh.shubhechha.R;
 import com.subh.shubhechha.databinding.ItemCategoryGridBinding;
+import com.subh.shubhechha.utils.TimeUtil;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ public class ShopGridAdapter extends RecyclerView.Adapter<ShopGridAdapter.ViewHo
 
     private final List<ShopResponse.Shop> shopList;
     private OnShopClickListener listener;
+    TimeUtil timeUtil = new TimeUtil();
+
+
 
     // Constructor
     public ShopGridAdapter(List<ShopResponse.Shop> shopList) {
@@ -66,6 +70,16 @@ public class ShopGridAdapter extends RecyclerView.Adapter<ShopGridAdapter.ViewHo
         public void bind(ShopResponse.Shop shop, int position) {
             // Set shop name
             binding.shopName.setText(shop.getName());
+            if (shop.getDuration_formatted() != null) {
+                binding.orderTime.setText(shop.getDuration_formatted());
+            }else{
+                binding.orderTime.setText("N/A");
+            }
+            if (shop.getOpen_time() != null && shop.getClose_time() != null) {
+                binding.shopOpenDuration.setText(timeUtil.formatOnlyTime(shop.getOpen_time()) + " - " + timeUtil.formatOnlyTime(shop.getClose_time()));
+            }else {
+                binding.shopOpenDuration.setText("N/A");
+            }
 
             // Load shop image using Glide
             String imageUrl = shop.getImage_path();
