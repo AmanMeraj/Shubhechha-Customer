@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "247095800526",
+    "project_id": "shubhechha-274d5",
+    "storage_bucket": "shubhechha-274d5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247095800526:android:7f9e75acc278559ddc969f",
+        "android_client_info": {
+          "package_name": "com.subh.shubhechha"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgx7HVlhKiw9c_6qZq5SbFUWJ5BrFCO1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
