@@ -24,6 +24,7 @@ import com.subh.shubhechha.Model.ProfileResponse;
 import com.subh.shubhechha.Model.RegisterUserResponse;
 import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
+import com.subh.shubhechha.Model.UpdateFcm;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
 import com.subh.shubhechha.Retrofit.ApiRequest;
@@ -178,6 +179,11 @@ public class Repository {
     }
     public LiveData<ApiResponse<OrderDetails>> getOrderDetails(String auth, int orderId) {
         Call<OrderDetails> call = apiRequest.getOrderDetails(auth, orderId);
+        return performRequest(call);
+    }
+
+    public LiveData<ApiResponse<GenericPostResponse>> addFcm(String auth, UpdateFcm updateFcm) {
+        Call<GenericPostResponse> call = apiRequest.addFcm(auth, updateFcm );
         return performRequest(call);
     }
 

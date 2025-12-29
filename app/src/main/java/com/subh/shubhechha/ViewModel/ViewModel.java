@@ -24,6 +24,7 @@ import com.subh.shubhechha.Model.ProfileResponse;
 import com.subh.shubhechha.Model.RegisterUserResponse;
 import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
+import com.subh.shubhechha.Model.UpdateFcm;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
 import com.subh.shubhechha.Repository.Repository;
@@ -98,6 +99,9 @@ public class ViewModel extends AndroidViewModel {
     }
     public LiveData<Repository.ApiResponse<OrderDetails>> getOrderDetails(String auth, int orderId) {
         return repository.getOrderDetails(auth, orderId);
+    }
+    public LiveData<Repository.ApiResponse<GenericPostResponse>> addFcm(String auth, UpdateFcm updateFcm) {
+        return repository.addFcm(auth, updateFcm);
     }
     public LiveData<Repository.ApiResponse<GenericPostResponse>> deleteCartItem(String auth, int itemId) {
         return repository.deleteCartItem(auth, itemId);

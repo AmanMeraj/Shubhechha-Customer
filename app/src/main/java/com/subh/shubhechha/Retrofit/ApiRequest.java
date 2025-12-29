@@ -15,6 +15,7 @@ import com.subh.shubhechha.Model.ProfileResponse;
 import com.subh.shubhechha.Model.RegisterUserResponse;
 import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
+import com.subh.shubhechha.Model.UpdateFcm;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
 
@@ -245,6 +246,13 @@ public interface ApiRequest {
     Call<OrderDetails> getOrderDetails(
             @Header("Authorization") String authorization,
             @Path("id") int orderId
+    );
+
+    @Headers({"Accept: application/json"})
+    @POST("fcm-version-update")
+    Call<GenericPostResponse> addFcm(
+            @Header("Authorization") String authorization,
+            @Body UpdateFcm updateFcm
     );
 
 

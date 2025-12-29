@@ -1,5 +1,7 @@
 package com.subh.shubhechha.Fragments;
 
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -37,13 +39,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.subh.shubhechha.Activities.ContainerActivity;
 import com.subh.shubhechha.Activities.ShopsActivity;
 import com.subh.shubhechha.Adapters.BannerAdapter;
 import com.subh.shubhechha.Adapters.CategoryHorizontalAdapter;
 import com.subh.shubhechha.CurvedBottomDrawable;
 import com.subh.shubhechha.Model.HomeResponse;
+import com.subh.shubhechha.Model.UpdateFcm;
 import com.subh.shubhechha.R;
 import com.subh.shubhechha.ViewModel.ViewModel;
 import com.subh.shubhechha.databinding.FragmentHomeBinding;
@@ -91,6 +96,22 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         viewModel = new ViewModelProvider(this).get(ViewModel.class);
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        String token = task.getResult();
+                        Log.d("TAG", "onComplete: "+token);
+                        updateFCM(token);
+                    }
+                });
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         return binding.getRoot();
     }
@@ -150,6 +171,18 @@ public class HomeFragment extends Fragment {
         } else {
             requestLocationPermission();
         }
+
+
+    }
+    private void updateFCM(String fcm) {
+        UpdateFcm updateFcm = new UpdateFcm();
+        updateFcm.setFcm_token(fcm);
+
+        String auth="Bearer "+pref.getPrefString(requireActivity(),pref.user_token);
+        Log.d("TAG", "getLoggedIn: "+auth);
+        viewModel.addFcm(auth,updateFcm).observe(requireActivity(), response -> {
+
+        });
     }
 
     private boolean hasLocationPermission() {
