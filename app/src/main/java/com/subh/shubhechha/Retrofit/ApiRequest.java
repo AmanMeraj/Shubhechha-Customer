@@ -15,9 +15,9 @@ import com.subh.shubhechha.Model.ProfileResponse;
 import com.subh.shubhechha.Model.RegisterUserResponse;
 import com.subh.shubhechha.Model.ShopItemResponse;
 import com.subh.shubhechha.Model.ShopResponse;
+import com.subh.shubhechha.Model.UpdateFcm;
 import com.subh.shubhechha.Model.User;
 import com.subh.shubhechha.Model.VerifyOtpResponse;
-import com.subh.shubhechha.Model.WalletResponse;
 
 import java.util.List;
 
@@ -249,9 +249,10 @@ public interface ApiRequest {
     );
 
     @Headers({"Accept: application/json"})
-    @GET("wallet")
-    Call<WalletResponse> getWallet(
-            @Header("Authorization") String authorization
+    @POST("fcm-version-update")
+    Call<GenericPostResponse> addFcm(
+            @Header("Authorization") String authorization,
+            @Body UpdateFcm updateFcm
     );
 
 
