@@ -75,8 +75,8 @@ public class ViewModel extends AndroidViewModel {
         return repository.home(auth);
     }
 
-    public LiveData<Repository.ApiResponse<NotificationResponse>>getNotification(String auth) {
-        return repository.getNotification(auth);
+    public LiveData<Repository.ApiResponse<NotificationResponse>>getNotification(String auth,int page) {
+        return repository.getNotification(auth,page);
     }
     public LiveData<Repository.ApiResponse<ShopResponse>>shops(String auth, String longitude, String latitude, int moduleId) {
         return repository.shops(auth,longitude,latitude,moduleId);

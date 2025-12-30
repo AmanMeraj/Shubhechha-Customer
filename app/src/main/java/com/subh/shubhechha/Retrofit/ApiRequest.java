@@ -187,7 +187,8 @@ public interface ApiRequest {
     @Headers({"Accept: application/json"})
     @GET("notifications")
     Call<NotificationResponse> getNotification(
-            @Header("Authorization") String authorization
+            @Header("Authorization") String authorization,
+            @Query("page") int page
     );
     @Headers({"Accept: application/json"})
     @GET("shops")

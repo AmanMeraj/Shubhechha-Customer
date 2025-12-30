@@ -92,8 +92,8 @@ public class Repository {
         return performRequest(call);
     }
 
-    public LiveData<ApiResponse<NotificationResponse>> getNotification(String auth) {
-        Call<NotificationResponse> call = apiRequest.getNotification(auth);
+    public LiveData<ApiResponse<NotificationResponse>> getNotification(String auth,int page) {
+        Call<NotificationResponse> call = apiRequest.getNotification(auth,page);
         return performRequest(call);
     }
     public LiveData<ApiResponse<ShopResponse>> shops(String auth, String longitude, String latitude, int moduleId) {

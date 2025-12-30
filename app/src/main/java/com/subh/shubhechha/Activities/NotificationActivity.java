@@ -1,6 +1,7 @@
 package com.subh.shubhechha.Activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -22,6 +23,8 @@ import com.subh.shubhechha.databinding.ActivityNotificationBinding;
 import com.subh.shubhechha.utils.Utility;
 
 public class NotificationActivity extends Utility {
+
+    private static final String TAG = "NotificationActivity";
 
     private ActivityNotificationBinding binding;
     private NotificationAdapter notificationAdapter;
@@ -54,7 +57,7 @@ public class NotificationActivity extends Utility {
             loadNotifications(currentPage);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "onCreate error", e);
             showError("Failed to initialize notifications");
         }
     }
@@ -65,13 +68,11 @@ public class NotificationActivity extends Utility {
 
     private void initializeViews() {
         try {
-            // Setup toolbar back button
             if (binding.backBtn != null) {
                 binding.backBtn.setOnClickListener(v -> onBackPressed());
             }
-
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "initializeViews error", e);
         }
     }
 
@@ -88,24 +89,20 @@ public class NotificationActivity extends Utility {
                     float percentage = Math.abs(verticalOffset / (float) scrollRange);
                     if (Float.isNaN(percentage) || Float.isInfinite(percentage)) return;
 
-                    // Fade in/out toolbar title
                     if (binding.tvToolbarTitle != null) {
                         binding.tvToolbarTitle.setAlpha(percentage);
                     }
 
-                    // Fade in/out expanded title
                     if (binding.tvNotificationExpanded != null) {
                         binding.tvNotificationExpanded.setAlpha(1 - percentage);
                     }
 
-                    // Scale the background curve
                     if (binding.peachCurveBg != null) {
                         float scale = 1 - (percentage * 0.2f);
                         scale = Math.max(0.8f, Math.min(1f, scale));
                         binding.peachCurveBg.setScaleY(scale);
                     }
 
-                    // Check if fully collapsed or expanded
                     if (Math.abs(verticalOffset) >= scrollRange) {
                         if (!isCollapsed) {
                             isCollapsed = true;
@@ -121,7 +118,7 @@ public class NotificationActivity extends Utility {
             });
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "setupCollapsingToolbar error", e);
         }
     }
 
@@ -135,21 +132,17 @@ public class NotificationActivity extends Utility {
 
     private void setupRecyclerView() {
         try {
-            // Initialize adapter
             notificationAdapter = new NotificationAdapter();
 
-            // Setup RecyclerView
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
             binding.rcNotification.setLayoutManager(layoutManager);
             binding.rcNotification.setHasFixedSize(true);
             binding.rcNotification.setAdapter(notificationAdapter);
 
-            // Add padding to prevent first item from being hidden
             binding.rcNotification.setClipToPadding(false);
-            int topPadding = (int) (16 * getResources().getDisplayMetrics().density); // 16dp
+            int topPadding = (int) (16 * getResources().getDisplayMetrics().density);
             binding.rcNotification.setPadding(0, topPadding, 0, 0);
 
-            // Add scroll listener for pagination
             binding.rcNotification.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -160,10 +153,19 @@ public class NotificationActivity extends Utility {
                         int totalItemCount = layoutManager.getItemCount();
                         int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
+                        Log.d(TAG, "Scroll - visible: " + visibleItemCount +
+                                ", total: " + totalItemCount +
+                                ", first: " + firstVisibleItemPosition +
+                                ", isLoading: " + isLoading +
+                                ", isLastPage: " + isLastPage +
+                                ", currentPage: " + currentPage +
+                                ", lastPage: " + lastPage);
+
                         if (!isLoading && !isLastPage) {
-                            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
-                                    && firstVisibleItemPosition >= 0) {
-                                // Load next page
+                            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 3
+                                    && firstVisibleItemPosition >= 0
+                                    && totalItemCount >= visibleItemCount) {
+                                Log.d(TAG, "Triggering page load: " + (currentPage + 1));
                                 loadNotifications(currentPage + 1);
                             }
                         }
@@ -172,41 +174,64 @@ public class NotificationActivity extends Utility {
             });
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "setupRecyclerView error", e);
             throw new RuntimeException("Failed to setup RecyclerView", e);
         }
     }
 
     private void loadNotifications(int page) {
         try {
-            if (isLoading || isLastPage) return;
+            if (isLoading) {
+                Log.d(TAG, "Already loading, skipping page: " + page);
+                return;
+            }
+
+            if (isLastPage) {
+                Log.d(TAG, "Last page reached, skipping page: " + page);
+                return;
+            }
 
             isLoading = true;
-            showLoading(page == 1); // Show main loading only for first page
+            Log.d(TAG, "Starting to load page: " + page);
 
-            String token = "Bearer "+getToken();
-            if (token == null || token.isEmpty()) {
+            showLoading(page == 1);
+            if (page > 1) {
+                showPaginationLoading(true);
+            }
+
+            String token = "Bearer " + getToken();
+            if (token == null || token.isEmpty() || token.equals("Bearer null")) {
                 showError("Authentication required");
                 showLoading(false);
+                showPaginationLoading(false);
                 isLoading = false;
                 return;
             }
 
-            viewModel.getNotification(token).observe(this, apiResponse -> {
+            Log.d(TAG, "Making API call for page: " + page);
+
+            viewModel.getNotification(token, page).observe(this, apiResponse -> {
                 isLoading = false;
                 showLoading(false);
+                showPaginationLoading(false);
+
+                Log.d(TAG, "API response received for page: " + page);
 
                 if (apiResponse != null && apiResponse.isSuccess()) {
+                    Log.d(TAG, "Success response for page: " + page);
                     handleSuccessResponse(apiResponse.data, page);
                 } else {
+                    Log.e(TAG, "Error response for page: " + page +
+                            ", message: " + (apiResponse != null ? apiResponse.message : "null"));
                     handleErrorResponse(apiResponse);
                 }
             });
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "loadNotifications error for page: " + page, e);
             showError("Failed to load notifications");
             showLoading(false);
+            showPaginationLoading(false);
             isLoading = false;
         }
     }
@@ -218,54 +243,72 @@ public class NotificationActivity extends Utility {
                 if (data.getNotifications() != null) {
                     NotificationResponse.Notifications notifications = data.getNotifications();
 
+                    // Log pagination info
+                    Log.d(TAG, "═══════════════════════════════════════");
+                    Log.d(TAG, "Pagination Info for page " + page + ":");
+                    Log.d(TAG, "Current Page: " + notifications.getCurrent_page());
+                    Log.d(TAG, "Last Page: " + notifications.getLast_page());
+                    Log.d(TAG, "Per Page: " + notifications.getPer_page());
+                    Log.d(TAG, "Total Items: " + notifications.getTotal());
+                    Log.d(TAG, "Items in Response: " + (notifications.getData() != null ? notifications.getData().size() : 0));
+                    Log.d(TAG, "From: " + notifications.getFrom());
+                    Log.d(TAG, "To: " + notifications.getTo());
+                    Log.d(TAG, "Next Page URL: " + notifications.getNext_page_url());
+                    Log.d(TAG, "═══════════════════════════════════════");
+
                     // Update pagination info
                     currentPage = notifications.getCurrent_page();
                     lastPage = notifications.getLast_page();
                     isLastPage = currentPage >= lastPage;
 
-                    // Get notification items
+                    Log.d(TAG, "Updated - currentPage: " + currentPage +
+                            ", lastPage: " + lastPage +
+                            ", isLastPage: " + isLastPage);
+
                     if (notifications.getData() != null && !notifications.getData().isEmpty()) {
-                        android.util.Log.d("NotificationActivity", "Total items: " + notifications.getData().size());
-                        android.util.Log.d("NotificationActivity", "First item title: " +
-                                (notifications.getData().get(0) != null ? notifications.getData().get(0).getTitle() : "null"));
+                        Log.d(TAG, "Processing " + notifications.getData().size() + " items for page " + page);
 
                         if (page == 1) {
-                            // First page - replace all data
                             notificationAdapter.clearNotifications();
                             notificationAdapter.addNotifications(notifications.getData());
+                            Log.d(TAG, "Replaced all data with page 1");
                         } else {
-                            // Next pages - append data
+                            int positionStart = notificationAdapter.getItemCount();
                             notificationAdapter.addNotifications(notifications.getData());
+                            Log.d(TAG, "Appended " + notifications.getData().size() +
+                                    " items at position: " + positionStart);
                         }
 
                         updateEmptyState(false);
 
-                        // Force RecyclerView to update
                         binding.rcNotification.post(() -> {
                             if (page == 1 && binding.rcNotification.getLayoutManager() != null) {
                                 binding.rcNotification.scrollToPosition(0);
                             }
                         });
+
+                        Log.d(TAG, "Total items in adapter: " + notificationAdapter.getItemCount());
                     } else {
+                        Log.w(TAG, "No data in response for page: " + page);
                         if (page == 1) {
-                            // No notifications at all
                             updateEmptyState(true);
                         }
                     }
                 } else {
+                    Log.w(TAG, "Notifications object is null for page: " + page);
                     if (page == 1) {
                         updateEmptyState(true);
                     }
                 }
             } else {
+                Log.w(TAG, "Response or data is null for page: " + page);
                 if (page == 1) {
                     updateEmptyState(true);
                 }
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            android.util.Log.e("NotificationActivity", "Error processing notifications", e);
+            Log.e(TAG, "handleSuccessResponse error for page: " + page, e);
             showError("Error processing notifications");
         }
     }
@@ -275,8 +318,6 @@ public class NotificationActivity extends Utility {
             if (apiResponse != null) {
                 if (apiResponse.code == Repository.ERROR_SESSION_EXPIRED) {
                     showError("Session expired. Please login again.");
-                    // Handle session expiration (e.g., navigate to login)
-//                    handleSessionExpired();
                 } else if (apiResponse.message != null && !apiResponse.message.isEmpty()) {
                     showError(apiResponse.message);
                 } else {
@@ -291,7 +332,7 @@ public class NotificationActivity extends Utility {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "handleErrorResponse error", e);
         }
     }
 
@@ -305,7 +346,7 @@ public class NotificationActivity extends Utility {
                 binding.rcNotification.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "updateEmptyState error", e);
         }
     }
 
@@ -315,7 +356,16 @@ public class NotificationActivity extends Utility {
                 binding.progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "showLoading error", e);
+        }
+    }
+
+    private void showPaginationLoading(boolean show) {
+        try {
+            // If you have a separate loading indicator for pagination
+            // binding.paginationProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        } catch (Exception e) {
+            Log.e(TAG, "showPaginationLoading error", e);
         }
     }
 
@@ -325,20 +375,20 @@ public class NotificationActivity extends Utility {
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "showError error", e);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Clean up resources
         if (binding != null) {
             binding = null;
         }
         notificationAdapter = null;
     }
-    private  String getToken(){
+
+    private String getToken() {
         return pref.getPrefString(this, pref.user_token);
     }
 }

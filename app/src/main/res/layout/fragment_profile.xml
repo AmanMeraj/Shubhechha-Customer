@@ -209,9 +209,9 @@
                     android:id="@+id/iv_wallet"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@drawable/shub_wallet"
+                    android:src="@drawable/badge"
                     android:padding="4dp"
-                    app:tint="@color/black" />
+                     />
 
                 <TextView
                     android:id="@+id/tv_wallet"

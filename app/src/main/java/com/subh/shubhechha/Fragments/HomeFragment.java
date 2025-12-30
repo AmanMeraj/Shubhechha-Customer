@@ -557,7 +557,7 @@ public class HomeFragment extends Fragment {
         binding.footerBannerViewPager.setPadding(padding, 0, padding, 0);
 
         CompositePageTransformer transformer = new CompositePageTransformer();
-        transformer.addTransformer(new MarginPageTransformer(6 ));
+        transformer.addTransformer(new MarginPageTransformer(6));
         transformer.addTransformer((page, position) -> {
             float absPosition = Math.abs(position);
             if (absPosition >= 1) {
@@ -568,6 +568,29 @@ public class HomeFragment extends Fragment {
             }
         });
         binding.footerBannerViewPager.setPageTransformer(transformer);
+
+        // Adjust height dynamically after layout
+        binding.footerBannerViewPager.post(() -> updateViewPagerHeight());
+    }
+
+    private void updateViewPagerHeight() {
+        binding.footerBannerViewPager.getChildAt(0).post(() -> {
+            int height = 0;
+            View child = binding.footerBannerViewPager.getChildAt(0);
+            if (child != null) {
+                child.measure(
+                        View.MeasureSpec.makeMeasureSpec(child.getWidth(), View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                );
+                height = child.getMeasuredHeight();
+            }
+
+            if (height > 0) {
+                ViewGroup.LayoutParams params = binding.footerBannerViewPager.getLayoutParams();
+                params.height = height;
+                binding.footerBannerViewPager.setLayoutParams(params);
+            }
+        });
     }
 
     private void updateCategoriesFromApi(ArrayList<HomeResponse.Module> apiModules) {

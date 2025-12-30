@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.subh.shubhechha.Activities.ActivityWebview;
 import com.subh.shubhechha.Activities.AddressBookActivity;
 import com.subh.shubhechha.Activities.ContainerActivity;
 import com.subh.shubhechha.Activities.IntroductionActivity;
@@ -315,7 +316,9 @@ public class ProfileFragment extends Fragment {
         binding.linearMyWallet.setOnClickListener(v -> {
             binding.linearMyWallet.postDelayed(() -> {
                 if (!isAdded() || getActivity() == null) return;
-
+                Intent intent = new Intent(getActivity(), ActivityWebview.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }, 300);
         });
 
